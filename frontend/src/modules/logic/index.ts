@@ -4,6 +4,7 @@ import type { LabModule } from '../../types'
 export const logicModule: LabModule = {
   id: 'logic',
   title: 'Logic',
+  studioName: 'Logic Studio',
   symbol: 'p ∧ q',
   tagline: 'Propositions, truth tables and proof.',
   description:

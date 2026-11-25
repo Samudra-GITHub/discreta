@@ -4,6 +4,7 @@ import type { LabModule } from '../../types'
 export const algebraModule: LabModule = {
   id: 'algebra',
   title: 'Algebra',
+  studioName: 'Algebra Lab',
   symbol: 'ℤₙ',
   tagline: 'Modular arithmetic and algebraic structures.',
   description:
@@ -20,5 +21,5 @@ export const algebraModule: LabModule = {
     'The Caesar, affine and Vigenère ciphers are all arithmetic in ℤ₂₆.',
   ],
   icon: Sigma,
-  status: 'planned',
+  status: 'in-progress',
 }

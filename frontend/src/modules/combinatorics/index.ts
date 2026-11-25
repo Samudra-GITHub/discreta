@@ -4,6 +4,7 @@ import type { LabModule } from '../../types'
 export const combinatoricsModule: LabModule = {
   id: 'combinatorics',
   title: 'Combinatorics',
+  studioName: 'Combinatorics Studio',
   symbol: 'C(n, k)',
   tagline: 'Counting, arrangements and recurrences.',
   description:

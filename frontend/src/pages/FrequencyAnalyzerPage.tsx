@@ -1,4 +1,5 @@
 import { PlannedFeaturePage } from '../components/PlannedFeaturePage'
+import { Sculpture } from '../components/sculpture/Sculpture'
 
 export function FrequencyAnalyzerPage() {
   return (
@@ -6,6 +7,7 @@ export function FrequencyAnalyzerPage() {
       eyebrow="Cryptography"
       title="Frequency Analyzer"
       description="Natural language is statistically lopsided, and simple ciphers preserve that shape. The analyzer will make the statistics visible and show how they break a cipher."
+      illustration={<Sculpture shape="frequency" />}
       planned={[
         {
           title: 'Letter frequency histogram',
@@ -27,7 +29,8 @@ export function FrequencyAnalyzerPage() {
       foundations={[
         'For a text of N letters with counts nᵢ, the index of coincidence is IC = Σ nᵢ(nᵢ − 1) / (N(N − 1)).',
         'English text has IC ≈ 0.066; uniformly random letters give 1/26 ≈ 0.038.',
-        'Monoalphabetic ciphers permute letters but leave the frequency histogram’s shape unchanged.',
+        'Monoalphabetic ciphers permute letters, so the frequencies are rearranged rather than removed: the histogram keeps its shape.',
+        'The bars in the illustration are the typical English frequencies of the twelve most common letters, E T A O I N S H R D L U.',
       ]}
     />
   )

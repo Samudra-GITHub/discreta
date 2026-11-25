@@ -8,12 +8,14 @@ import {
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { PlannedFeaturePage } from '../components/PlannedFeaturePage'
+import { Sculpture } from '../components/sculpture/Sculpture'
+import { Tile } from '../components/Tile'
 
 function stage(title: string, detail: string) {
   return (
     <div className="px-1 py-0.5 text-center">
-      <p className="text-xs font-medium text-fg">{title}</p>
-      <p className="mt-0.5 text-[10px] leading-tight text-fg-muted">{detail}</p>
+      <p className="text-xs font-bold text-fg">{title}</p>
+      <p className="mt-0.5 text-[10px] leading-tight font-semibold text-fg-muted">{detail}</p>
     </div>
   )
 }
@@ -62,6 +64,7 @@ export default function SecureJourneyPage() {
       eyebrow="Cryptography"
       title="Secure Message Journey"
       description="A guided walk through the life of one message: encoded as numbers, encrypted, sent, then decrypted. Each stage will show the mathematics applied to your text."
+      illustration={<Sculpture shape="journey" />}
       planned={[
         {
           title: 'Step-by-step walkthrough',
@@ -77,17 +80,14 @@ export default function SecureJourneyPage() {
         },
       ]}
     >
-      <section aria-labelledby="journey-diagram-title">
-        <h2 id="journey-diagram-title" className="text-sm font-medium text-fg">
-          Planned stages
-        </h2>
-        <p className="mt-1 text-sm text-fg-muted">
+      <Tile title="Planned stages" rise={1}>
+        <p className="-mt-1 mb-3 text-sm font-medium text-fg-muted">
           A static outline of the pipeline. No message is encrypted or transmitted here.
         </p>
         <div
           role="img"
           aria-label="Pipeline: plaintext, encode, encrypt, channel, decrypt, decode"
-          className="discreta-flow mt-4 h-[300px] overflow-hidden rounded-xl border border-line"
+          className="discreta-flow aurora-inset h-[300px] overflow-hidden rounded-2xl"
         >
           <ReactFlow
             nodes={nodes}
@@ -103,10 +103,10 @@ export default function SecureJourneyPage() {
             zoomOnDoubleClick={false}
             preventScrolling={false}
           >
-            <Background gap={24} color="var(--color-line)" />
+            <Background gap={24} color="var(--color-line-strong)" />
           </ReactFlow>
         </div>
-      </section>
+      </Tile>
     </PlannedFeaturePage>
   )
 }

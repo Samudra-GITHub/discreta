@@ -21,6 +21,8 @@ export type ModuleId = 'logic' | 'sets' | 'combinatorics' | 'graphs' | 'algebra'
 export interface LabModule {
   id: ModuleId
   title: string
+  /** Longer name shown above the page title, for example "Logic Studio". */
+  studioName?: string
   /** Typographic mark used as the module's emblem, e.g. `p ∧ q`. */
   symbol: string
   tagline: string
@@ -50,3 +52,5 @@ export interface PlannedCapability {
   title: string
   detail: string
 }
+
+export * from './cipher'

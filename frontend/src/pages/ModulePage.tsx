@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom'
 import { PlannedFeaturePage } from '../components/PlannedFeaturePage'
+import { Sculpture } from '../components/sculpture/Sculpture'
 import { getLabModule } from '../modules'
 import { NotFoundPage } from './NotFoundPage'
 
@@ -12,9 +13,10 @@ export function ModulePage() {
 
   return (
     <PlannedFeaturePage
-      eyebrow="Mathematical module"
+      eyebrow={module.studioName ?? 'Mathematical module'}
       title={module.title}
       description={module.description}
+      illustration={<Sculpture shape={module.id} />}
       planned={module.topics.map((topic) => ({
         title: topic,
         detail: 'Interactive exploration to be designed and verified against SymPy.',

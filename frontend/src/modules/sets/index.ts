@@ -4,6 +4,7 @@ import type { LabModule } from '../../types'
 export const setsModule: LabModule = {
   id: 'sets',
   title: 'Sets',
+  studioName: 'Set Explorer',
   symbol: 'A ∪ B',
   tagline: 'Sets, relations and functions.',
   description:

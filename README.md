@@ -9,9 +9,15 @@ mathematical modules share one application, and the first topic under constructi
 **Simple Cipher & Frequency Analysis**: classical ciphers treated as arithmetic in ℤ₂₆,
 and the statistical attacks that break them.
 
-> **Status: foundation release (v0.1.0).** The application shell, API skeleton and
-> frontend–backend connection are in place and tested. **No mathematical tool is
-> implemented yet.** Every laboratory page is labelled *Planned* in the interface.
+> **Status: v0.3.0, the interactive Cipher Laboratory and a new look.** The backend
+> implements the Caesar and affine ciphers (hand-written gcd, extended Euclid and modular
+> inverse) behind a tested HTTP API, and the **Cipher Laboratory** page now uses it: choose a
+> cipher and key, press the round button, and see the result with the formula and a worked
+> example built from the real response. The whole interface follows one light design system
+> ([Aurora](docs/architecture/design-system.md)) with a 3D focal form on every page. The
+> other four modules and the frequency analysis are still planned and labelled so. The
+> ciphers are teaching tools, not secure encryption; see
+> [Caesar and affine ciphers](docs/mathematics/caesar-and-affine.md).
 
 ## Objectives
 
@@ -40,7 +46,7 @@ Combinatorics (key-space counting).
 
 ## Technology stack
 
-**Frontend:** React 19, TypeScript, Vite, Tailwind CSS 4, React Router, Lucide React,
+**Frontend:** React 19, TypeScript, Vite, Tailwind CSS 4, Vitest and Testing Library, React Router, Lucide React,
 React Flow (`@xyflow/react`)
 
 **Backend:** Python 3.12, FastAPI, Uvicorn, SymPy, Pytest
@@ -51,7 +57,7 @@ React Flow (`@xyflow/react`)
 discreta/
 ├── frontend/                 React + TypeScript + Vite application
 │   ├── src/
-│   │   ├── components/       Reusable UI pieces (sidebar, header, cards, status)
+│   │   ├── components/       Shell, panels, status; cipher/ (laboratory), sculpture/ (3D forms), illustrations/
 │   │   ├── layouts/          App shell and navigation definition
 │   │   ├── pages/            One component per route
 │   │   ├── modules/          One folder per mathematical module
@@ -63,12 +69,13 @@ discreta/
 ├── backend/                  FastAPI service
 │   ├── app/
 │   │   ├── api/v1/           Versioned HTTP routes (health, module metadata)
-│   │   ├── core/             Configuration
+│   │   ├── core/             Configuration, uniform error responses, request-size limit
 │   │   ├── modules/          One package per mathematical module
 │   │   │   ├── logic/  sets/  combinatorics/  graphs/  algebra/
 │   │   └── main.py           Application factory and entry point
 │   ├── tests/                Pytest suite
-│   └── requirements.txt
+│   ├── requirements.txt      Runtime dependencies
+│   └── requirements-dev.txt  Runtime plus development and test dependencies
 ├── docs/
 │   ├── architecture/         Design decisions
 │   ├── mathematics/          Mathematical write-ups
@@ -93,8 +100,11 @@ cd discreta
 cd backend
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
+python -m pip install -r requirements-dev.txt
 ```
+
+`requirements-dev.txt` includes `requirements.txt` and adds the test tools (pytest, httpx and
+SymPy). To install only what is needed to run the server, use `requirements.txt`.
 
 On macOS/Linux, activate with `source .venv/bin/activate` instead.
 
@@ -122,6 +132,13 @@ uvicorn app.main:app --reload --port 8000
 - API root: <http://localhost:8000/>
 - Health check: <http://localhost:8000/api/v1/health>
 - Interactive API docs: <http://localhost:8000/docs>
+- Cipher endpoints (all `POST`, JSON body): `/api/v1/algebra/caesar/encrypt`,
+  `/api/v1/algebra/caesar/decrypt`, `/api/v1/algebra/affine/encrypt`,
+  `/api/v1/algebra/affine/decrypt`. Keys are integers with absolute value at most
+  9007199254740991 (2⁵³ − 1), text is at most 10,000 characters and a request body at most
+  256 KiB. Every error returns `{"detail": [{"loc", "msg", "type"}]}`: 422 for invalid input
+  (including invalid affine multipliers), 413 for oversized bodies. Details are in the
+  [mathematics note](docs/mathematics/caesar-and-affine.md#10-api).
 
 **Frontend**, from `frontend/`:
 
@@ -139,8 +156,9 @@ badge call the health endpoint and show the real result. Stop the backend and pr
 # backend (from backend/, venv active)
 python -m pytest
 
-# frontend (from frontend/): type-check and production build
+# frontend (from frontend/): type-check and production build, then the unit and component tests
 npm run build
+npm test
 ```
 
 The frontend dev server must stay on port 5173 (it is configured with `strictPort`)
@@ -157,6 +175,7 @@ if anything misbehaves. Both folders are git-ignored.
 ## Documentation
 
 - [Architecture decisions](docs/architecture/overview.md)
+- [Design system (Aurora)](docs/architecture/design-system.md)
 - [Mathematics notes](docs/mathematics/README.md)
 - [Report](docs/report/README.md)
 

@@ -1,56 +1,81 @@
+@import '@fontsource/rajdhani/600.css';
+@import '@fontsource/rajdhani/700.css';
+@import '@fontsource-variable/nunito';
 @import 'tailwindcss';
 
 /*
- * Design tokens. A single restrained accent on neutral, slightly cool greys.
- * Text colours are chosen to keep WCAG AA contrast on `canvas` and `surface`.
+ * DISCRETA design system: "Aurora".
+ *
+ * Based on the Dribbble "UI Animation" reference supplied for the project: a light, airy
+ * lavender-grey ground washed with pale pink and icy blue, soft near-white translucent panels
+ * with diffuse violet-tinted shadows, thin hairlines, pastel iridescent accents, a squared
+ * display face over a rounded text face, and unhurried motion.
+ *
+ * Every page uses these semantic tokens, so a component never hard-codes a colour. Text colours
+ * were checked for WCAG AA contrast (4.5:1) on `canvas`, `surface` and `raised`.
  */
 @theme {
-  --font-sans: Inter, ui-sans-serif, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  --font-sans: 'Nunito Variable', ui-sans-serif, system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Rajdhani', 'Segoe UI', ui-sans-serif, sans-serif;
   --font-serif: 'Cambria Math', Cambria, 'Times New Roman', ui-serif, serif;
   --font-mono: ui-monospace, 'Cascadia Code', 'SFMono-Regular', Menlo, Consolas, monospace;
 
-  --color-canvas: #0c0d0f;
-  --color-surface: #121417;
-  --color-raised: #181b1f;
-  --color-line: #24282e;
-  --color-line-strong: #353b44;
+  --color-canvas: #dadbed;
+  --color-surface: #eef0f9;
+  --color-raised: #f6f7fc;
+  --color-line: #cdd0e8;
+  --color-line-strong: #b4b8da;
 
-  --color-fg: #e8eaed;
-  --color-fg-muted: #a0a7b1;
-  --color-fg-subtle: #7d8590;
+  --color-fg: #23263a;
+  --color-fg-muted: #4c506a;
+  --color-fg-subtle: #555a75;
 
-  --color-accent: #8ab4f8;
-  --color-accent-strong: #aecbfa;
-  --color-accent-wash: #8ab4f81a;
+  --color-accent: #4f3fc4;
+  --color-accent-strong: #3b2d9e;
+  --color-accent-wash: #4f3fc41f;
 
-  --color-ok: #6fcf97;
-  --color-warn: #e5b567;
-  --color-err: #ec7f7a;
+  --color-ok: #08665b;
+  --color-warn: #8a5200;
+  --color-err: #a8231b;
+
+  /* Iridescent accents for illustrations and highlights; never used for body text. */
+  --color-iris-blue: #64a2d9;
+  --color-iris-violet: #7b5cd6;
+  --color-iris-pink: #e879a6;
+  --color-iris-mint: #5fd0c2;
+  --color-iris-peach: #f3c9d8;
 
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 @layer base {
   html {
-    color-scheme: dark;
+    color-scheme: light;
     background-color: var(--color-canvas);
   }
 
   body {
     margin: 0;
     min-height: 100dvh;
-    background-color: var(--color-canvas);
     color: var(--color-fg);
     font-family: var(--font-sans);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    background-color: var(--color-canvas);
+    /* The ambient wash: lavender top-left, icy blue top-right, pale pink bottom-right. */
+    background-image:
+      radial-gradient(900px 640px at 0% 0%, #d2ccf0 0%, transparent 62%),
+      radial-gradient(760px 600px at 100% 6%, #e3e6f1 0%, transparent 60%),
+      radial-gradient(900px 700px at 100% 100%, #f1d3e3 0%, transparent 58%),
+      radial-gradient(700px 520px at 0% 100%, #dfe9ee 0%, transparent 60%);
+    background-attachment: fixed;
   }
 
   :focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 2px;
-    border-radius: 4px;
+    border-radius: 6px;
   }
 
   ::selection {
@@ -72,12 +97,13 @@
 
 /* React Flow theming (used by the Secure Message Journey diagram). */
 .discreta-flow {
-  --xy-background-color: var(--color-surface);
+  --xy-background-color: transparent;
   --xy-node-background-color: var(--color-raised);
   --xy-node-color: var(--color-fg);
-  --xy-node-border: 1px solid var(--color-line-strong);
-  --xy-node-border-radius: 10px;
-  --xy-edge-stroke: var(--color-fg-subtle);
+  --xy-node-border: 1px solid #ffffffb8;
+  --xy-node-border-radius: 14px;
+  --xy-node-boxshadow-default: inset 0 1px 0 #ffffffd9, 0 10px 22px -12px rgb(66 56 150 / 0.45);
+  --xy-edge-stroke: var(--color-iris-violet);
   --xy-edge-stroke-width: 1.5;
   --xy-attribution-background-color: transparent;
   font-family: var(--font-sans);
@@ -85,4 +111,122 @@
 
 .discreta-flow .react-flow__attribution a {
   color: var(--color-fg-subtle);
+}
+
+@layer components {
+  /* The basic surface: a soft, near-white, translucent panel with a faint top highlight and a
+     long, diffuse, violet-tinted shadow. Restrained border, no heavy blur. */
+  .aurora-tile {
+    background: color-mix(in srgb, var(--color-surface) 80%, transparent);
+    border: 1px solid color-mix(in srgb, #ffffff 72%, transparent);
+    border-radius: 1.25rem;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.85),
+      0 18px 36px -22px rgb(66 56 150 / 0.4);
+  }
+
+  /* Small raised control surface: segmented buttons, steppers, chips, pills. */
+  .aurora-chip {
+    background: color-mix(in srgb, var(--color-raised) 92%, transparent);
+    border: 1px solid color-mix(in srgb, #ffffff 80%, transparent);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.9),
+      0 6px 14px -8px rgb(66 56 150 / 0.45);
+  }
+
+  /* Pressed-in surface: text fields and tracks. */
+  .aurora-inset {
+    background: color-mix(in srgb, var(--color-canvas) 38%, var(--color-raised));
+    box-shadow: inset 0 2px 5px rgb(66 56 150 / 0.12);
+    border: 1px solid color-mix(in srgb, var(--color-line) 70%, transparent);
+  }
+
+  /* The one primary action style: iridescent gradient with a soft coloured glow. */
+  .aurora-primary {
+    background-image: linear-gradient(135deg, var(--color-iris-blue), var(--color-iris-violet) 55%, var(--color-iris-pink));
+    color: #ffffff;
+    box-shadow:
+      0 14px 26px -12px rgb(91 67 214 / 0.7),
+      inset 0 1px 0 rgb(255 255 255 / 0.45);
+  }
+}
+
+/* Staged entrance, like the reference: panels fade up out of a soft blur, one after another. */
+@keyframes aurora-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes aurora-letter {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes aurora-swap {
+  from {
+    opacity: 0.15;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes aurora-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.aurora-rise {
+  animation: aurora-rise 560ms var(--ease-out-quart) both;
+  animation-delay: calc(var(--rise-i, 0) * 70ms);
+}
+
+.aurora-swap {
+  animation: aurora-swap 380ms ease-out both;
+}
+
+.aurora-letter {
+  display: inline-block;
+  animation: aurora-letter 280ms var(--ease-out-quart) both;
+  animation-delay: calc(var(--i, 0) * 14ms);
+}
+
+/* The focal illustration drifts very slightly; the only continuous motion in the app. */
+.aurora-float {
+  animation: aurora-float 7s ease-in-out infinite;
+}
+
+/* Route change: the new page eases in. */
+.page-enter {
+  animation: page-enter 320ms var(--ease-out-quart) both;
 }

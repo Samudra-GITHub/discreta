@@ -11,3 +11,10 @@ Suggested outline:
 5. Verification and testing
 6. Evaluation, limitations and future work
 7. References
+
+## Screenshots (v0.3.0)
+
+`screenshots-v0.3.0/` (kept locally, not committed: about 13 MB of PNG) holds full-page captures of every page at desktop (1440 px) and mobile
+(375 px) widths, plus the Cipher Laboratory in its main states: Caesar encrypted, affine
+decrypted (showing the backend's modular inverse), an invalid multiplier, and the backend
+offline. They were taken against the real backend.

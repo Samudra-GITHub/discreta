@@ -1,10 +1,11 @@
-import { ChartColumn, KeyRound, LayoutDashboard, Route } from 'lucide-react'
+import { BookOpenText, ChartColumn, KeyRound, LayoutDashboard, Route } from 'lucide-react'
 import { labModules, labPath } from '../modules'
 import type { NavGroup, NavItem } from '../types'
 
 export const CIPHER_LAB_PATH = '/cipher-lab'
 export const FREQUENCY_ANALYZER_PATH = '/frequency-analyzer'
 export const SECURE_JOURNEY_PATH = '/secure-message-journey'
+export const THEORY_PATH = '/theory'
 
 export const cryptoNavItems: NavItem[] = [
   { label: 'Cipher Laboratory', to: CIPHER_LAB_PATH, icon: KeyRound },
@@ -24,6 +25,10 @@ export const navGroups: NavGroup[] = [
   {
     label: 'Cryptography',
     items: cryptoNavItems,
+  },
+  {
+    label: 'Reference',
+    items: [{ label: 'Theory & Proofs', to: THEORY_PATH, icon: BookOpenText }],
   },
 ]
 

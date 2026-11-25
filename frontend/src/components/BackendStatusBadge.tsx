@@ -20,7 +20,7 @@ export function BackendStatusBadge() {
     <div
       role="status"
       aria-live="polite"
-      className="flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-xs text-fg-muted"
+      className="aurora-chip flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-bold text-fg-muted"
     >
       <span aria-hidden="true" className={`size-2 rounded-full ${STATUS_DOT[status]}`} />
       <span className="whitespace-nowrap">{STATUS_LABEL[status]}</span>

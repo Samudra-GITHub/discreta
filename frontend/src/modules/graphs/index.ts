@@ -4,6 +4,7 @@ import type { LabModule } from '../../types'
 export const graphsModule: LabModule = {
   id: 'graphs',
   title: 'Graphs',
+  studioName: 'Graph Lab',
   symbol: 'G = (V, E)',
   tagline: 'Vertices, edges, paths and trees.',
   description:
