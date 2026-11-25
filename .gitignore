@@ -221,3 +221,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- DISCRETA frontend (Node) ---
+node_modules/
+*.tsbuildinfo
+.vite/
+npm-debug.log*
