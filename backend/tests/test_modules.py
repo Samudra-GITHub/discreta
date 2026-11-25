@@ -24,4 +24,7 @@ def test_modules_endpoint_is_honest_about_status():
     assert response.status_code == 200
     body = response.json()
     assert [m["slug"] for m in body] == EXPECTED_SLUGS
-    assert all(m["status"] == "planned" for m in body)
+    # Only algebra (Caesar and affine ciphers) has any implementation so far.
+    statuses = {m["slug"]: m["status"] for m in body}
+    assert statuses.pop("algebra") == "in_progress"
+    assert set(statuses.values()) == {"planned"}

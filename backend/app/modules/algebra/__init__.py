@@ -1,7 +1,7 @@
-"""Number theory & algebraic structures module (engine not implemented yet).
+"""Number theory & algebraic structures module.
 
-The classical ciphers of the chosen base topic (Caesar, affine, Vigenere) are
-arithmetic over Z_n, so their mathematics belongs to this module.
+Implemented: Euclidean and extended Euclidean algorithms, modular inverses, and the
+Caesar and affine ciphers (arithmetic over Z_26). Everything else is still planned.
 """
 
 from app.modules.algebra.router import router
@@ -11,6 +11,7 @@ INFO = ModuleInfo(
     slug="algebra",
     title="Algebra",
     summary="Modular arithmetic, number theory and algebraic structures behind ciphers.",
+    status="in_progress",
 )
 
 __all__ = ["INFO", "router"]
