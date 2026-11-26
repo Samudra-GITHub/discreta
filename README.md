@@ -15,12 +15,14 @@ letter frequencies, χ², the index of coincidence and Kasiski examination.
 <img alt="MIT license" src="https://img.shields.io/badge/license-MIT-444?style=flat-square">
 </p>
 
+<p><a href="docs/report/DISCRETA_Project_Report.pdf"><b>Read the project report (PDF, 26 pages)</b></a></p>
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/report/screenshots-v1.0.0/workspace-vigenere-encrypt-dark-1440.png">
   <img src="docs/report/screenshots-v1.0.0/workspace-vigenere-encrypt-light-1440.png" width="100%" alt="The Cipher Workspace encrypting a message with the Vigenère cipher: the keyword LEMON repeating over the letters, the formula with its shifts, and the ciphertext with the first three letters worked out.">
 </picture>
 
-<sub>Team **BugSquad** (Samudra Kar and Shriyanshu Rout Roy) · Version 1.0.0 · [Documentation](docs/README.md) · [Project report](docs/report/PROJECT_REPORT.md) · [API](docs/api.md)</sub>
+<sub>Team **BugSquad** (Samudra Kar and Shriyanshu Rout Roy) · Version 1.0.0 · [Documentation](docs/README.md) · [Project report](docs/report/PROJECT_REPORT.md) · [PDF](docs/report/DISCRETA_Project_Report.pdf) · [API](docs/api.md)</sub>
 
 </div>
 
