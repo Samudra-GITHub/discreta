@@ -1,38 +1,28 @@
-import { lazy, Suspense } from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from './layouts/AppLayout'
-import {
-  CIPHER_LAB_PATH,
-  FREQUENCY_ANALYZER_PATH,
-  SECURE_JOURNEY_PATH,
-} from './layouts/navigation'
-import { CipherLabPage } from './pages/CipherLabPage'
-import { DashboardPage } from './pages/DashboardPage'
-import { FrequencyAnalyzerPage } from './pages/FrequencyAnalyzerPage'
-import { ModulePage } from './pages/ModulePage'
+import { ANALYSIS_PATH, legacyRedirects, SETTINGS_PATH, WORKSPACE_PATH } from './layouts/navigation'
+import { AnalysisPage } from './pages/AnalysisPage'
 import { NotFoundPage } from './pages/NotFoundPage'
-
-// React Flow is only needed on this page, so it is split into its own chunk.
-const SecureJourneyPage = lazy(() => import('./pages/SecureJourneyPage'))
+import { OverviewPage } from './pages/OverviewPage'
+import { SettingsPage } from './pages/SettingsPage'
+import { WorkspacePage } from './pages/WorkspacePage'
+import { ThemeProvider } from './theme/ThemeProvider'
 
 export default function App() {
   return (
-    <Routes>
-      <Route element={<AppLayout />}>
-        <Route index element={<DashboardPage />} />
-        <Route path="labs/:moduleId" element={<ModulePage />} />
-        <Route path={CIPHER_LAB_PATH.slice(1)} element={<CipherLabPage />} />
-        <Route path={FREQUENCY_ANALYZER_PATH.slice(1)} element={<FrequencyAnalyzerPage />} />
-        <Route
-          path={SECURE_JOURNEY_PATH.slice(1)}
-          element={
-            <Suspense fallback={<p className="text-sm text-fg-subtle">Loading…</p>}>
-              <SecureJourneyPage />
-            </Suspense>
-          }
-        />
-        <Route path="*" element={<NotFoundPage />} />
-      </Route>
-    </Routes>
+    <ThemeProvider>
+      <Routes>
+        <Route element={<AppLayout />}>
+          <Route index element={<OverviewPage />} />
+          <Route path={WORKSPACE_PATH.slice(1)} element={<WorkspacePage />} />
+          <Route path={ANALYSIS_PATH.slice(1)} element={<AnalysisPage />} />
+          <Route path={SETTINGS_PATH.slice(1)} element={<SettingsPage />} />
+          {Object.entries(legacyRedirects).map(([from, to]) => (
+            <Route key={from} path={from.slice(1)} element={<Navigate to={to} replace />} />
+          ))}
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
+      </Routes>
+    </ThemeProvider>
   )
 }

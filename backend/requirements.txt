@@ -1,13 +1,7 @@
-# DISCRETA backend dependencies (Python 3.12+)
-# Versions are the ones the foundation was verified against; the compatible-release
+# DISCRETA backend runtime dependencies (Python 3.12+).
+# Versions are the ones the project was verified against; the compatible-release
 # operator (~=) allows patch updates only.
+# Development and test tools live in requirements-dev.txt.
 
 fastapi~=0.165.0
 uvicorn[standard]~=0.54.0
-
-# Symbolic mathematics: used to verify results of the mathematical engines.
-sympy~=1.14.0
-
-# Testing. httpx is required by fastapi.testclient.TestClient.
-pytest~=9.2.0
-httpx~=0.28.1

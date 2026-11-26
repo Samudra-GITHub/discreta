@@ -1,3 +1,3 @@
-"""DISCRETA backend: FastAPI service for the Discrete Mathematics & Cryptography Laboratory."""
+"""DISCRETA backend: FastAPI service for the classical cryptography and frequency analysis laboratory."""
 
-__version__ = "0.1.0"
+__version__ = "0.4.0"

@@ -1,85 +1,115 @@
 # Architecture overview
 
-This document records the main design decisions of the v0.1.0 foundation and the reasons
-for them.
+DISCRETA is a classical cryptography and frequency analysis laboratory: encrypt and decrypt with Caesar
+and affine ciphers, analyse ciphertext statistically, and rank candidate keys. The mathematics (modular
+arithmetic, gcd, the extended Euclidean algorithm, modular inverses, frequency distributions, the
+chi-squared statistic) runs behind the interface and is documented in `docs/mathematics/`.
+
+History: v0.1.0 foundation, v0.2.0 and v0.2.1 cipher engine, v0.3.0 first Cipher Laboratory, v0.4.0
+product refocus (this document). Earlier plans for separate Logic, Sets, Combinatorics and Graphs
+laboratories were dropped: they were outside the project topic, and their empty stubs were removed.
 
 ## Monorepo
 
-`frontend/` and `backend/` live in one repository. The project has two contributors and
-the two halves change together (an API change usually needs a matching UI change), so a
-single history and a single pull request per feature is simpler than two repositories.
+`frontend/` and `backend/` live in one repository. The two halves change together (an API change usually
+needs a matching UI change), so one history and one pull request per feature is simpler than two
+repositories.
 
-## Module contract
+## Backend modules
 
-The five mathematical modules (logic, sets, combinatorics, graphs, algebra) are mirrored
-on both sides with the same names.
+Each package under `backend/app/modules/<slug>/` exposes `INFO` (a `ModuleInfo`) and `router` (an
+`APIRouter` with prefix `/<slug>`). `modules/__init__.py` lists them in `MODULES`, and the v1 router mounts
+each one under `/api/v1/<slug>`.
 
-**Backend.** Each package under `backend/app/modules/<slug>/` exposes:
+| Module | Files | Responsibility |
+| --- | --- | --- |
+| `algebra` | `number_theory.py`, `ciphers.py`, `schemas.py`, `router.py` | Euclid, extended Euclid, modular inverse; Caesar and affine encryption and decryption; key validation |
+| `analysis` | `english.py`, `scoring.py`, `frequency.py`, `cryptanalysis.py`, `schemas.py`, `router.py` | English reference, χ², letter frequencies, Caesar and affine key ranking, reliability |
 
-- `INFO`: a `ModuleInfo` (slug, title, summary, status), defined in `modules/base.py`
-- `router`: a FastAPI `APIRouter` with prefix `/<slug>`
+The mathematics (`number_theory`, `ciphers`, `scoring`, `frequency`, `cryptanalysis`) never imports
+FastAPI, so it can be tested and reused directly. The routers only translate requests into calls on those
+functions and turn expected failures into the uniform error response. `analysis` calls `algebra` for
+decryption and inverses and has no cipher arithmetic of its own.
 
-`app/modules/__init__.py` lists the modules in `MODULES`. The v1 router mounts every
-module's router, so a finished module's endpoints appear at `/api/v1/<slug>/...` without
-touching any other file. Routers are empty on purpose: the mathematical engines are not
-implemented, and `GET /api/v1/modules` reports every module as `planned`.
+Endpoints: `GET /`, `GET /api/v1/health`, `GET /api/v1/modules`,
+`POST /api/v1/algebra/{caesar,affine}/{encrypt,decrypt}` and
+`POST /api/v1/analysis/{frequency, caesar/crack, affine/search}`.
 
-**Frontend.** Each folder under `frontend/src/modules/<slug>/` exports a `LabModule`
-description (title, symbol, topics, icon, status). `modules/index.ts` registers them; the
-sidebar, dashboard cards and module pages are all generated from that list.
+### Cross-cutting backend rules
 
-Adding a module means adding one folder and one registry line on each side.
-
-## Where the ciphers live
-
-The base topic's ciphers (Caesar, affine, Vigenère) are arithmetic over ℤ₂₆, so their
-mathematics belongs to the **algebra** module. Key-space counting uses **combinatorics**.
-The three cryptography pages in the UI are presentation layers over those modules, not a
-sixth module. If the cryptography code outgrows algebra, a dedicated package can be
-added under the same contract.
-
-## Honest status
-
-Nothing in the UI pretends to compute. Planned pages say so in a visible note, status
-badges read "Planned", and the Secure Message Journey diagram is a static outline. When a
-feature is built, its `status` changes in one place and the badge follows.
-
-## Backend
-
-- **Application factory** (`create_app`) lets tests build an app with custom settings.
-- **Settings** are read from environment variables with local defaults
-  (`app/core/config.py`). Only `DISCRETA_CORS_ORIGINS` exists so far.
-- **CORS** allows the Vite dev server (`localhost`/`127.0.0.1` on 5173) and `vite preview`
-  (4173). No wildcard, no credentials, only the methods the API uses.
-- **Health** (`GET /api/v1/health`) returns `status`, `service`, `version`, `message` and a
-  UTC `timestamp`. `GET /` returns a small service banner.
-- **SymPy** is a dependency now so that later engines can verify their results
-  symbolically; nothing imports it yet.
+* **Uniform errors** (`app/core/errors.py`). Every client error has the body
+  `{"detail": [{"loc": [...], "msg": "...", "type": "..."}]}`: validation (422), invalid keys (422
+  `invalid_key`), a key search over a text with no letters (422 `no_letters`), unknown routes (404),
+  wrong methods (405) and oversized bodies (413). The offending input is never echoed, the body is plain
+  ASCII, and at most 20 problems are listed. Unexpected exceptions return a generic 500.
+* **Request limits** (`app/core/limits.py`). Bodies over 256 KiB get a 413 before parsing, for both the
+  declared and the streamed length. Text is limited to 10,000 characters; keys to ±(2⁵³ − 1), the largest
+  integer a browser represents exactly. These are API limits, not mathematical ones.
+* **CORS** allows the Vite dev server (5173) and `vite preview` (4173) on `localhost` and `127.0.0.1`.
+* **SymPy** is used only by tests, as an oracle. No production calculation depends on it.
+* **Dependencies**: `requirements.txt` (FastAPI, Uvicorn) for running; `requirements-dev.txt` adds pytest,
+  httpx and SymPy.
 
 ## Frontend
 
-- **Stack choices.** Vite and Tailwind CSS 4 (via `@tailwindcss/vite`) for a small
-  toolchain; React Router for the multi-page shell; React Flow only where a graph is
-  drawn. TypeScript runs in strict mode with `noUncheckedIndexedAccess`.
-- **API layer.** `services/config.ts` reads `VITE_API_BASE_URL`; `services/api.ts` is a
-  small typed `fetch` wrapper with timeout and abort support; `services/health.ts` adds
-  runtime validation of the health payload.
-- **Connection indicator.** `hooks/useBackendHealth.ts` performs a real request on mount
-  and every 30 seconds. The status is `online` only for a well-formed response with
-  `status: "ok"`; any network error, timeout, HTTP error or malformed body gives
-  `offline`. A context provider shares one poller between the header badge and the
-  dashboard panel.
-- **Code splitting.** The Secure Message Journey page, the only user of React Flow, is
-  loaded lazily so the initial bundle stays small.
-- **Accessibility.** Skip link, labelled landmarks, visible focus rings, `aria-live` on the
-  connection status, reduced-motion support, and a mobile navigation drawer that is
-  removed from the tab order while closed.
+React 19, TypeScript (strict, `noUncheckedIndexedAccess`), Vite, Tailwind CSS 4, React Router, Lucide icons.
+No other runtime dependencies.
+
+### Structure
+
+| Path | Role |
+| --- | --- |
+| `layouts/AppLayout.tsx`, `layouts/navigation.ts` | The shell (page plus floating taskbar) and the four destinations |
+| `components/Taskbar.tsx` | The only navigation |
+| `components/ui.tsx`, `TextEditor.tsx` | Shared primitives: sections, segmented control, notices, copy, editor |
+| `components/workspace/` | Key controls, the formula, the worked steps |
+| `components/analysis/` | Charts, the three tabs, the candidate table and inspector |
+| `pages/` | Overview, Workspace, Analysis Lab, Settings, Not found |
+| `session/` | Shared state: workspace, analysis and the transfers between them |
+| `theme/` | Light, dark, system |
+| `services/` | `api.ts` (request, timeout, abort, error parsing), `cipher.ts`, `analysis.ts` (reply guards), `health.ts` |
+| `modules/algebra/` | Key parsing and validation, worked example, the cipher state hook |
+| `modules/analysis/interpret.ts` | Plain-language reading of analysis results |
+
+### The backend is the source of truth
+
+The frontend never encrypts, decrypts, counts letters or computes χ². It validates what the user typed
+(an integer with at most 2⁵³ − 1 in magnitude, at most 10,000 characters), sends requests, checks the
+shape of each reply, and presents it. Small presentation helpers use exact `BigInt` arithmetic (reducing a
+key mod 26, explaining why a multiplier is invalid) and the worked example is cross-checked letter by letter
+against the backend's output and hidden if anything disagrees. The only text the interface writes about
+results (`interpret.ts`) describes numbers the backend returned.
+
+### Session and the connected workflow
+
+`SessionProvider` (inside the router, above the routes) holds one in-memory session: the workspace state
+(`useCipherLab`) and the analysis state (`useAnalysisSession`: the ciphertext, the active tab, and one
+result per analysis). It survives navigation and ends when the tab closes; nothing is persisted.
+
+* **Workspace → Analysis Lab:** "Send to Analysis Lab" (or "Analyse" on the input) sets the analysis text,
+  opens the lab and runs the frequency analysis.
+* **Analysis Lab → Workspace:** "Send to Cipher Workspace" on a candidate fills the workspace with the
+  candidate's plaintext, the candidate's cipher and key, and the *encrypt* operation, so running it
+  reproduces the ciphertext.
+* **Clear:** Clear in the lab empties the text and all results; "Clear session" in Settings resets both
+  halves.
+* Results are only used while they match the current inputs; otherwise they stay visible, marked as out of
+  date, and stop filling in numbers (the inverse, the formula) for different keys.
+* Analyses run only on an explicit button press, never while typing.
+
+### Accessibility and responsiveness
+
+Skip link; one labelled `nav`; `aria-current` on the active destination; a roving-tabindex tablist with
+arrow, Home and End keys; labelled form controls; text alternatives for both charts plus a ranked data table;
+`aria-live` regions for results; status shown with icons and words; reduced-motion support; layouts verified
+without horizontal scrolling at 375, 768, 1024 and 1440 px.
 
 ## Known limitations
 
-- No mathematical engine, API endpoint or interactive tool exists yet.
-- No frontend unit tests yet; the frontend is verified by type-check, production build and
-  manual browser checks. A test runner (Vitest) is the natural next addition once there is
-  logic to test.
-- Python and Node virtual environments are not portable between folders; see the README
-  if the repository is moved.
+* Only Caesar and affine exist. Vigenère, Kasiski examination and the index of coincidence are not
+  implemented; the analysis package is organised so they can be added beside `cryptanalysis.py`.
+* The English reference is a single average table; a text in another language, or an unusual English text
+  such as a pangram, can be ranked wrongly. Short texts are flagged but still ranked.
+* An integer literal of more than 4,300 digits in a request body is refused by Python's JSON parser with
+  HTTP 400 (`bad_request`) rather than 422. POSTs to a URL with a trailing slash get a 307 redirect.
+* Python and Node environments are not portable between folders; see the README if the repository moves.

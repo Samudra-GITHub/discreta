@@ -1,47 +1,46 @@
 # DISCRETA
 
-**An Interactive Discrete Mathematics & Cryptography Laboratory**
+**A Classical Cryptography and Frequency Analysis Laboratory**
 
 Team: **BugSquad** (2 members)
 
-DISCRETA is a web platform for exploring discrete mathematics by experiment. Five
-mathematical modules share one application, and the first topic under construction is
-**Simple Cipher & Frequency Analysis**: classical ciphers treated as arithmetic in ℤ₂₆,
-and the statistical attacks that break them.
+DISCRETA is a web application for encrypting, decrypting and *breaking* classical ciphers. Encrypt a
+message with a Caesar or affine cipher, send the ciphertext to the Analysis Lab, count its letters,
+compare them with English, and rank every possible key by a chi-squared score. The mathematics behind
+it is discrete mathematics: modular arithmetic over ℤ₂₆, the Euclidean algorithm, modular inverses and
+frequency distributions.
 
-> **Status: foundation release (v0.1.0).** The application shell, API skeleton and
-> frontend–backend connection are in place and tested. **No mathematical tool is
-> implemented yet.** Every laboratory page is labelled *Planned* in the interface.
+> **Status: v0.4.0, refocused on cryptography.** The interface is four destinations reached from a
+> floating glass taskbar: **Overview**, **Cipher Workspace**, **Analysis Lab** and **Settings**, in a light
+> and a dark theme. The backend implements Caesar and affine ciphers (hand-written gcd, extended Euclid
+> and modular inverse), letter-frequency analysis, the chi-squared statistic, a Caesar key search (26
+> keys) and an affine key search (all 312 valid keys). Results are statistical estimates, not proof, and
+> the ciphers are teaching tools, not secure encryption. See
+> [Caesar and affine ciphers](docs/mathematics/caesar-and-affine.md) and
+> [Frequency analysis](docs/mathematics/frequency-analysis.md). Vigenère, Kasiski examination and the index
+> of coincidence are not implemented.
 
 ## Objectives
 
-1. Make discrete mathematics tangible: each concept comes with an interactive tool next to
-   its precise definition.
-2. Keep the mathematics correct: results computed by the backend are to be cross-checked
-   with SymPy and covered by automated tests.
-3. Deliver one complete topic end to end (ciphers and frequency analysis), including its
-   mathematical write-up, before widening scope.
-4. Keep the architecture modular so each laboratory can be built, tested and documented
-   independently.
+1. Make classical cryptography tangible: encrypt, decrypt and analyse in one connected workspace.
+2. Keep the mathematics correct: every algorithm is tested against independent expected values, with
+   SymPy and the standard library as oracles only.
+3. Keep the backend the single source of truth for cryptographic and statistical calculations.
+4. Stay honest: the interface labels estimates as estimates and never presents a ranking as proof.
 
-## The five mathematical modules
+## What you can do
 
-| Module | Scope |
+| Destination | Purpose |
 | --- | --- |
-| **Logic** | Propositions, truth tables, equivalence, quantifiers, proof techniques |
-| **Sets** | Set operations, relations, equivalence classes, functions |
-| **Combinatorics** | Counting principles, permutations, combinations, recurrences |
-| **Graphs** | Graphs and trees, connectivity, traversal, shortest paths |
-| **Algebra** | Number theory, modular arithmetic, algebraic structures |
-
-The cryptography pages (**Cipher Laboratory**, **Frequency Analyzer**, **Secure Message
-Journey**) sit on top of these modules, mainly Algebra (arithmetic in ℤ₂₆) and
-Combinatorics (key-space counting).
+| **Overview** | What DISCRETA is, and the two entry points |
+| **Cipher Workspace** | Caesar and affine encryption and decryption, key controls, the relevant formula, the result, copy, swap, send to analysis |
+| **Analysis Lab** | Frequency Analysis (A–Z counts against English), Caesar Analysis (26 ranked shifts), Affine Analysis (312 ranked keys); inspect a candidate and send it back to the workspace |
+| **Settings** | Light, dark or system theme; clear the session; backend status |
 
 ## Technology stack
 
-**Frontend:** React 19, TypeScript, Vite, Tailwind CSS 4, React Router, Lucide React,
-React Flow (`@xyflow/react`)
+**Frontend:** React 19, TypeScript, Vite, Tailwind CSS 4, React Router, Lucide React, Vitest and Testing Library;
+fonts Space Grotesk, Inter and IBM Plex Mono (self-hosted)
 
 **Backend:** Python 3.12, FastAPI, Uvicorn, SymPy, Pytest
 
@@ -51,24 +50,25 @@ React Flow (`@xyflow/react`)
 discreta/
 ├── frontend/                 React + TypeScript + Vite application
 │   ├── src/
-│   │   ├── components/       Reusable UI pieces (sidebar, header, cards, status)
+│   │   ├── components/       Taskbar, shared UI; workspace/ (keys, formula), analysis/ (charts, tabs)
 │   │   ├── layouts/          App shell and navigation definition
 │   │   ├── pages/            One component per route
-│   │   ├── modules/          One folder per mathematical module
-│   │   │   ├── logic/  sets/  combinatorics/  graphs/  algebra/
+│   │   ├── modules/          Frontend logic: algebra/ (keys, cipher state), analysis/ (readings)
+│   │   ├── session/          Shared workspace and analysis state
+│   │   ├── theme/            Light, dark and system themes
 │   │   ├── services/         Backend API client (config, request helper, health)
 │   │   ├── hooks/            React hooks (backend health polling)
 │   │   └── types/            Shared TypeScript types
 │   └── package.json
 ├── backend/                  FastAPI service
 │   ├── app/
-│   │   ├── api/v1/           Versioned HTTP routes (health, module metadata)
-│   │   ├── core/             Configuration
-│   │   ├── modules/          One package per mathematical module
-│   │   │   ├── logic/  sets/  combinatorics/  graphs/  algebra/
+│   │   ├── api/v1/           Versioned HTTP routes (health, module list)
+│   │   ├── core/             Configuration, uniform error responses, request-size limit
+│   │   ├── modules/          algebra/ (ciphers, number theory), analysis/ (frequency, chi-squared, key search)
 │   │   └── main.py           Application factory and entry point
 │   ├── tests/                Pytest suite
-│   └── requirements.txt
+│   ├── requirements.txt      Runtime dependencies
+│   └── requirements-dev.txt  Runtime plus development and test dependencies
 ├── docs/
 │   ├── architecture/         Design decisions
 │   ├── mathematics/          Mathematical write-ups
@@ -93,8 +93,11 @@ cd discreta
 cd backend
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
+python -m pip install -r requirements-dev.txt
 ```
+
+`requirements-dev.txt` includes `requirements.txt` and adds the test tools (pytest, httpx and
+SymPy). To install only what is needed to run the server, use `requirements.txt`.
 
 On macOS/Linux, activate with `source .venv/bin/activate` instead.
 
@@ -122,6 +125,15 @@ uvicorn app.main:app --reload --port 8000
 - API root: <http://localhost:8000/>
 - Health check: <http://localhost:8000/api/v1/health>
 - Interactive API docs: <http://localhost:8000/docs>
+- Cipher endpoints (all `POST`, JSON body): `/api/v1/algebra/caesar/encrypt`,
+  `/api/v1/algebra/caesar/decrypt`, `/api/v1/algebra/affine/encrypt`,
+  `/api/v1/algebra/affine/decrypt`. Analysis endpoints (`POST`, `{"text"}`): `/api/v1/analysis/frequency`,
+  `/api/v1/analysis/caesar/crack` and `/api/v1/analysis/affine/search`. Keys are integers with absolute value at most
+  9007199254740991 (2⁵³ − 1), text is at most 10,000 characters and a request body at most
+  256 KiB. Every error returns `{"detail": [{"loc", "msg", "type"}]}`: 422 for invalid input
+  (including invalid affine multipliers), 413 for oversized bodies. Details are in the
+  [mathematics notes](docs/mathematics/caesar-and-affine.md#10-api) and
+[frequency analysis](docs/mathematics/frequency-analysis.md#7-api).
 
 **Frontend**, from `frontend/`:
 
@@ -129,9 +141,9 @@ uvicorn app.main:app --reload --port 8000
 npm run dev
 ```
 
-Open <http://localhost:5173>. The dashboard's *Backend connection* panel and the header
-badge call the health endpoint and show the real result. Stop the backend and press
-*Check again* to see the offline state.
+Open <http://localhost:5173>. Settings shows the live result of the backend health check; stop the
+backend and press *Check again* to see the offline state, which the Cipher Workspace and Analysis Lab
+also report when you run something.
 
 **Tests and checks:**
 
@@ -139,8 +151,9 @@ badge call the health endpoint and show the real result. Stop the backend and pr
 # backend (from backend/, venv active)
 python -m pytest
 
-# frontend (from frontend/): type-check and production build
+# frontend (from frontend/): type-check and production build, then the unit and component tests
 npm run build
+npm test
 ```
 
 The frontend dev server must stay on port 5173 (it is configured with `strictPort`)
@@ -157,6 +170,7 @@ if anything misbehaves. Both folders are git-ignored.
 ## Documentation
 
 - [Architecture decisions](docs/architecture/overview.md)
+- [Design system (Instrument)](docs/architecture/design-system.md)
 - [Mathematics notes](docs/mathematics/README.md)
 - [Report](docs/report/README.md)
 

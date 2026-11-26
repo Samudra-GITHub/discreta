@@ -1,88 +1,564 @@
+@import '@fontsource-variable/space-grotesk';
+@import '@fontsource-variable/inter';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
 @import 'tailwindcss';
 
 /*
- * Design tokens. A single restrained accent on neutral, slightly cool greys.
- * Text colours are chosen to keep WCAG AA contrast on `canvas` and `surface`.
+ * DISCRETA design system: "Instrument".
+ *
+ * A precision instrument with the restraint of a case file. Warm paper-like neutrals, one
+ * orange accent used only for the primary action, the active destination and the findings
+ * that matter, and a monospaced face for anything that is data (ciphertext, keys, formulas).
+ *
+ * Every colour is a semantic token with a light and a dark value, switched by the
+ * `data-theme` attribute on <html> (set by the ThemeProvider). Components never hard-code a
+ * colour. Text tokens were checked for WCAG AA contrast (4.5:1) on `canvas`, `surface` and
+ * `surface-2`; `accent-ink` is the accent as *text*, and `accent-solid` is the accent as a
+ * button fill, because the brightest orange alone does not reach 4.5:1 with small text.
  */
-@theme {
-  --font-sans: Inter, ui-sans-serif, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-  --font-serif: 'Cambria Math', Cambria, 'Times New Roman', ui-serif, serif;
-  --font-mono: ui-monospace, 'Cascadia Code', 'SFMono-Regular', Menlo, Consolas, monospace;
 
-  --color-canvas: #0c0d0f;
-  --color-surface: #121417;
-  --color-raised: #181b1f;
-  --color-line: #24282e;
-  --color-line-strong: #353b44;
+:root,
+:root[data-theme='light'] {
+  color-scheme: light;
+  --c-canvas: #eae8e0;
+  --c-surface: #f7f6f0;
+  --c-surface-2: #e2e0d7;
+  --c-fg: #242620;
+  --c-fg-muted: #626359;
+  --c-line: #d0cec2;
+  --c-line-strong: #b9b6a8;
+  --c-accent: #d45b37;
+  --c-accent-ink: #a93f1e;
+  --c-accent-solid: #bc4a27;
+  --c-on-accent: #ffffff;
+  --c-slate: #777f78;
+  --c-slate-ink: #4f564f;
+  --c-ok: #2f6b4a;
+  --c-warn: #8a5a00;
+  --c-err: #a8321f;
+  --glass-bg: rgb(247 246 240 / 0.74);
+  --glass-border: rgb(36 38 32 / 0.13);
+  --glass-hover: rgb(36 38 32 / 0.06);
+  --glass-active: rgb(36 38 32 / 0.085);
+  --glass-sheen: rgb(255 255 255 / 0.4);
+  --atmo-ink: rgb(36 38 32 / 0.2);
+  --atmo-line: rgb(36 38 32 / 0.05);
+  --atmo-line-strong: rgb(36 38 32 / 0.14);
+  --atmo-accent: rgb(212 91 55 / 0.4);
+  --glass-shadow:
+    0 1px 0 rgb(255 255 255 / 0.65) inset, 0 12px 32px -10px rgb(36 38 32 / 0.32),
+    0 2px 6px -2px rgb(36 38 32 / 0.16);
+}
 
-  --color-fg: #e8eaed;
-  --color-fg-muted: #a0a7b1;
-  --color-fg-subtle: #7d8590;
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --c-canvas: #171a19;
+  --c-surface: #222725;
+  --c-surface-2: #292f2c;
+  --c-fg: #e9e8df;
+  --c-fg-muted: #a1a69d;
+  --c-line: #353c39;
+  --c-line-strong: #48514d;
+  --c-accent: #e47b50;
+  --c-accent-ink: #ee8f67;
+  --c-accent-solid: #e47b50;
+  --c-on-accent: #171a19;
+  --c-slate: #91a49a;
+  --c-slate-ink: #b5c4bb;
+  --c-ok: #84c49d;
+  --c-warn: #dcab4a;
+  --c-err: #f08a76;
+  --glass-bg: rgb(34 39 37 / 0.72);
+  --glass-border: rgb(233 232 223 / 0.13);
+  --glass-hover: rgb(233 232 223 / 0.07);
+  --glass-active: rgb(233 232 223 / 0.1);
+  --glass-sheen: rgb(255 255 255 / 0.055);
+  --atmo-ink: rgb(145 164 154 / 0.3);
+  --atmo-line: rgb(145 164 154 / 0.06);
+  --atmo-line-strong: rgb(145 164 154 / 0.17);
+  --atmo-accent: rgb(228 123 80 / 0.42);
+  --glass-shadow:
+    0 1px 0 rgb(255 255 255 / 0.06) inset, 0 14px 36px -10px rgb(0 0 0 / 0.65),
+    0 2px 8px -2px rgb(0 0 0 / 0.4);
+}
 
-  --color-accent: #8ab4f8;
-  --color-accent-strong: #aecbfa;
-  --color-accent-wash: #8ab4f81a;
+@theme inline {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Space Grotesk Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Code', Menlo, Consolas, monospace;
 
-  --color-ok: #6fcf97;
-  --color-warn: #e5b567;
-  --color-err: #ec7f7a;
+  --color-canvas: var(--c-canvas);
+  --color-surface: var(--c-surface);
+  --color-surface-2: var(--c-surface-2);
+  --color-fg: var(--c-fg);
+  --color-fg-muted: var(--c-fg-muted);
+  --color-line: var(--c-line);
+  --color-line-strong: var(--c-line-strong);
+  --color-accent: var(--c-accent);
+  --color-accent-ink: var(--c-accent-ink);
+  --color-accent-solid: var(--c-accent-solid);
+  --color-on-accent: var(--c-on-accent);
+  --color-slate: var(--c-slate);
+  --color-slate-ink: var(--c-slate-ink);
+  --color-ok: var(--c-ok);
+  --color-warn: var(--c-warn);
+  --color-err: var(--c-err);
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
 
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 @layer base {
   html {
-    color-scheme: dark;
-    background-color: var(--color-canvas);
+    background-color: var(--c-canvas);
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
     margin: 0;
     min-height: 100dvh;
-    background-color: var(--color-canvas);
-    color: var(--color-fg);
+    color: var(--c-fg);
+    background-color: var(--c-canvas);
     font-family: var(--font-sans);
+    font-size: 0.9375rem;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
 
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.015em;
+    line-height: 1.15;
+    font-weight: 600;
+  }
+
   :focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 2px solid var(--c-accent);
     outline-offset: 2px;
-    border-radius: 4px;
   }
 
   ::selection {
-    background-color: var(--color-accent-wash);
-    color: var(--color-accent-strong);
+    background-color: color-mix(in srgb, var(--c-accent) 32%, transparent);
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    ::before,
-    ::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
+  /* Native form controls follow the theme. */
+  textarea,
+  input,
+  select,
+  button {
+    font: inherit;
+    color: inherit;
   }
 }
 
-/* React Flow theming (used by the Secure Message Journey diagram). */
-.discreta-flow {
-  --xy-background-color: var(--color-surface);
-  --xy-node-background-color: var(--color-raised);
-  --xy-node-color: var(--color-fg);
-  --xy-node-border: 1px solid var(--color-line-strong);
-  --xy-node-border-radius: 10px;
-  --xy-edge-stroke: var(--color-fg-subtle);
-  --xy-edge-stroke-width: 1.5;
-  --xy-attribution-background-color: transparent;
-  font-family: var(--font-sans);
+@layer components {
+  .btn {
+    display: inline-flex;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--c-line-strong);
+    background-color: transparent;
+    padding: 0 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--c-fg);
+    cursor: pointer;
+    transition:
+      background-color 150ms var(--ease-out-quart),
+      border-color 150ms var(--ease-out-quart),
+      color 150ms var(--ease-out-quart),
+      transform 150ms var(--ease-out-quart);
+  }
+  .btn:hover:not(:disabled) {
+    background-color: var(--c-surface-2);
+  }
+  .btn:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  .btn-sm {
+    height: 2rem;
+    padding: 0 0.75rem;
+    font-size: 0.8125rem;
+  }
+  .btn-primary {
+    border-color: transparent;
+    background-color: var(--c-accent-solid);
+    color: var(--c-on-accent);
+    font-weight: 600;
+  }
+  .btn-primary:hover:not(:disabled) {
+    background-color: var(--c-accent-solid);
+    filter: brightness(1.07);
+  }
+  .btn-ghost {
+    border-color: transparent;
+    color: var(--c-fg-muted);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    color: var(--c-fg);
+  }
+
+  .field {
+    width: 100%;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--c-line-strong);
+    background-color: var(--c-surface);
+    padding: 0.5rem 0.75rem;
+    transition: border-color 150ms var(--ease-out-quart);
+  }
+  .field::placeholder {
+    color: var(--c-fg-muted);
+    opacity: 0.8;
+  }
+  .field:hover {
+    border-color: var(--c-fg-muted);
+  }
+  .field:focus-visible {
+    outline: 2px solid var(--c-accent);
+    outline-offset: 1px;
+    border-color: var(--c-accent);
+  }
+  .field[aria-invalid='true'] {
+    border-color: var(--c-err);
+  }
+
+  /* An editing or result surface: the few places that deserve a boxed panel. */
+  .panel {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--c-line);
+    background-color: var(--c-surface);
+  }
+
+  .glass {
+    /* A faint sheen across the top edge: the restrained reflection of a glass surface. */
+    background-image: linear-gradient(180deg, var(--glass-sheen), transparent 55%);
+    background-color: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    -webkit-backdrop-filter: blur(14px) saturate(1.15);
+    backdrop-filter: blur(14px) saturate(1.15);
+  }
+
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .caption {
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--c-fg-muted);
+  }
 }
 
-.discreta-flow .react-flow__attribution a {
-  color: var(--color-fg-subtle);
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes result-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.page-enter {
+  animation: page-enter 240ms var(--ease-out-quart) both;
+}
+.result-enter {
+  animation: result-enter 200ms var(--ease-out-quart) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Without backdrop-filter support the glass must stay readable. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass {
+    background-color: var(--c-surface);
+  }
+}
+
+/*
+ * Atmosphere: the decorative background layer (components/atmosphere). It never receives
+ * pointer events or focus, only animates transform and opacity, lives in the empty side
+ * margins of wide screens, and stops entirely under reduced motion or in a hidden tab.
+ */
+.atmo {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  contain: layout paint;
+  font-family: var(--font-mono);
+}
+
+/* A very faint technical grid with a finer sub-grid; static, so it costs nothing. */
+.atmo-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, var(--atmo-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--atmo-line) 1px, transparent 1px);
+  background-size: 64px 64px;
+  background-position: center top;
+}
+
+/* Margins only: nothing animated is ever placed behind the content column. */
+.atmo-gutter {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: none;
+  width: calc(50% - 36rem);
+  overflow: hidden;
+}
+.atmo-gutter-left {
+  left: 0;
+}
+.atmo-gutter-right {
+  right: 0;
+}
+@media (min-width: 1300px) {
+  .atmo-gutter {
+    display: block;
+  }
+}
+
+.atmo-stream {
+  position: absolute;
+  top: 0;
+  width: 2.2rem;
+  color: var(--atmo-ink);
+  font-size: 10px;
+  line-height: 16px;
+  letter-spacing: 0.04em;
+  text-align: center;
+  mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+}
+.atmo-stream pre {
+  margin: 0;
+  font: inherit;
+}
+/* Two identical copies stacked; moving the track by half its height loops seamlessly. */
+.atmo-track {
+  animation: atmo-scroll 150s linear infinite;
+  will-change: transform;
+}
+.atmo-stream-reverse .atmo-track {
+  animation-direction: reverse;
+}
+@keyframes atmo-scroll {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+.atmo-gutter-left .atmo-stream {
+  left: 0.75rem;
+}
+.atmo-gutter-right .atmo-stream {
+  right: 0.75rem;
+}
+
+/* Labels, binary groups and the status tag sit inside the stream, never over it, and only
+   where the margin is wide enough to hold both. */
+.atmo-slot,
+.atmo-binary {
+  position: absolute;
+  display: none;
+  justify-content: center;
+}
+.atmo-gutter-left .atmo-slot,
+.atmo-gutter-left .atmo-binary {
+  left: 3.6rem;
+  right: 0.25rem;
+}
+.atmo-gutter-right .atmo-slot,
+.atmo-gutter-right .atmo-binary {
+  left: 0.25rem;
+  right: 3.6rem;
+}
+@media (min-width: 1500px) {
+  .atmo-slot {
+    display: flex;
+  }
+  .atmo-binary {
+    display: block;
+  }
+}
+
+.atmo-label {
+  display: block;
+  max-width: 4.6rem;
+  color: var(--atmo-ink);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  line-height: 1.5;
+  text-align: center;
+  text-transform: none;
+  animation: atmo-label 7s ease-in-out both;
+}
+@keyframes atmo-label {
+  0% {
+    opacity: 0;
+  }
+  15%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.atmo-binary {
+  color: var(--atmo-accent);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-align: center;
+  opacity: 0;
+  animation: atmo-binary 12s ease-in-out infinite;
+}
+@keyframes atmo-binary {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  25%,
+  55% {
+    opacity: 0.8;
+  }
+}
+
+.atmo-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 3.5rem;
+}
+.atmo-bars span {
+  width: 2px;
+  background: var(--atmo-line-strong);
+  transform-origin: bottom;
+  animation: atmo-bar 9s ease-in-out infinite;
+}
+@keyframes atmo-bar {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.62);
+  }
+}
+
+.atmo-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--atmo-ink);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+}
+.atmo-status i {
+  width: 5px;
+  height: 5px;
+  border-radius: 9999px;
+  background: var(--atmo-line-strong);
+}
+.atmo-status[data-busy='true'] i {
+  background: var(--atmo-accent);
+}
+
+/* The network motif on the Overview. */
+.atmo-network {
+  mask-image: linear-gradient(to left, #000 45%, transparent);
+  -webkit-mask-image: linear-gradient(to left, #000 45%, transparent);
+}
+.atmo-net-lines path {
+  stroke: var(--atmo-line-strong);
+}
+.atmo-net-nodes circle {
+  fill: var(--c-canvas);
+  stroke: var(--atmo-line-strong);
+  stroke-width: 1;
+}
+.atmo-net-text {
+  fill: var(--atmo-ink);
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+}
+.atmo-net-pulses path {
+  stroke: var(--atmo-accent);
+  stroke-dasharray: 5 95;
+  stroke-dashoffset: 5;
+  animation: atmo-pulse 10s linear infinite;
+}
+@keyframes atmo-pulse {
+  from {
+    stroke-dashoffset: 5;
+  }
+  to {
+    stroke-dashoffset: -95;
+  }
+}
+
+/* Paused while the tab is hidden; static when motion is reduced. */
+.atmo[data-paused='true'] *,
+.atmo-network[data-paused='true'] * {
+  animation-play-state: paused !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .atmo *,
+  .atmo-network *,
+  .atmo-network {
+    animation: none !important;
+  }
+  .atmo-binary {
+    opacity: 0;
+  }
+  .atmo-net-pulses {
+    display: none;
+  }
 }

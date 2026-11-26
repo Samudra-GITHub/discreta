@@ -1,0 +1,10 @@
+# Development and test dependencies: install this file for local work.
+-r requirements.txt
+
+# Independent mathematical oracle used by the test suite. The application code does not
+# import it; the cipher engine implements gcd, extended gcd and modular inverse itself.
+sympy~=1.14.0
+
+pytest~=9.2.0
+# Required by fastapi.testclient.TestClient.
+httpx~=0.28.1

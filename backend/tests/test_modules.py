@@ -5,10 +5,10 @@ from app.modules import MODULES, module_infos
 
 client = TestClient(app)
 
-EXPECTED_SLUGS = ["logic", "sets", "combinatorics", "graphs", "algebra"]
+EXPECTED_SLUGS = ["algebra", "analysis"]
 
 
-def test_registry_contains_the_five_modules_in_order():
+def test_registry_lists_the_cipher_and_analysis_modules_in_order():
     assert [info.slug for info in module_infos()] == EXPECTED_SLUGS
 
 
@@ -18,10 +18,16 @@ def test_every_module_exposes_the_contract():
         assert module.router.prefix == f"/{module.INFO.slug}"
 
 
-def test_modules_endpoint_is_honest_about_status():
+def test_modules_endpoint_reports_both_modules():
     response = client.get("/api/v1/modules")
 
     assert response.status_code == 200
     body = response.json()
     assert [m["slug"] for m in body] == EXPECTED_SLUGS
-    assert all(m["status"] == "planned" for m in body)
+    # Both modules are implemented since v0.4.0.
+    assert {m["status"] for m in body} == {"available"}
+
+
+def test_the_retired_stub_modules_are_gone():
+    for slug in ("logic", "sets", "combinatorics", "graphs"):
+        assert client.post(f"/api/v1/{slug}", json={}).status_code == 404
