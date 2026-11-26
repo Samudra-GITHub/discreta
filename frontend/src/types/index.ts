@@ -12,45 +12,15 @@ export interface HealthResponse {
 /** `checking` only occurs before the first result arrives. */
 export type BackendStatus = 'checking' | 'online' | 'offline'
 
-/** Implementation status shown honestly in the UI. */
-export type FeatureStatus = 'planned' | 'in-progress' | 'available'
-
-export type ModuleId = 'logic' | 'sets' | 'combinatorics' | 'graphs' | 'algebra'
-
-/** One of the five mathematical laboratories. */
-export interface LabModule {
-  id: ModuleId
-  title: string
-  /** Longer name shown above the page title, for example "Logic Studio". */
-  studioName?: string
-  /** Typographic mark used as the module's emblem, e.g. `p ∧ q`. */
-  symbol: string
-  tagline: string
-  description: string
-  /** Topics the module is planned to cover. */
-  topics: string[]
-  /** Short factual notes on the mathematics involved. */
-  foundations: string[]
-  icon: LucideIcon
-  status: FeatureStatus
-}
-
+/** A destination of the floating taskbar. */
 export interface NavItem {
   label: string
+  /** Shown instead of `label` on narrow screens. */
+  shortLabel: string
   to: string
   icon: LucideIcon
   end?: boolean
 }
 
-export interface NavGroup {
-  label: string
-  items: NavItem[]
-}
-
-/** A capability a placeholder page promises, described without pretending it exists. */
-export interface PlannedCapability {
-  title: string
-  detail: string
-}
-
+export * from './analysis'
 export * from './cipher'

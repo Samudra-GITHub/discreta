@@ -1,6 +1,6 @@
 """Shared contract that every mathematical module package follows.
 
-A module package (e.g. ``app.modules.logic``) must expose:
+A module package (e.g. ``app.modules.analysis``) must expose:
 
 * ``INFO``   - a :class:`ModuleInfo` describing the module.
 * ``router`` - a FastAPI ``APIRouter`` holding that module's endpoints.

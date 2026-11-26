@@ -1,23 +1,21 @@
-import { ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { PageHero } from '../components/PageHero'
-import { Sculpture } from '../components/sculpture/Sculpture'
+import { PageHeader } from '../components/ui'
+import { OVERVIEW_PATH, WORKSPACE_PATH } from '../layouts/navigation'
 
 export function NotFoundPage() {
   return (
-    <PageHero
-      eyebrow="404"
-      title="Page not found"
-      description="There is nothing at this address."
-      illustration={<Sculpture shape="orb" className="mx-auto max-w-xs" />}
-    >
-      <Link
-        to="/"
-        className="aurora-primary inline-flex h-11 items-center gap-2 rounded-full px-5 text-sm font-bold transition-transform duration-200 hover:-translate-y-0.5"
-      >
-        Back to the dashboard
-        <ArrowRight aria-hidden="true" className="size-4" />
-      </Link>
-    </PageHero>
+    <>
+      <PageHeader eyebrow="404" title="Page not found">
+        There is nothing at this address.
+      </PageHeader>
+      <div className="flex flex-wrap gap-3">
+        <Link to={WORKSPACE_PATH} className="btn btn-primary no-underline">
+          Open Cipher Workspace
+        </Link>
+        <Link to={OVERVIEW_PATH} className="btn no-underline">
+          Go to Overview
+        </Link>
+      </div>
+    </>
   )
 }

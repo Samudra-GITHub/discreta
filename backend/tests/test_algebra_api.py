@@ -193,17 +193,12 @@ class TestExistingEndpointsStillWork:
     def test_root(self):
         assert client.get("/").status_code == 200
 
-    def test_modules_lists_algebra_as_in_progress(self):
+    def test_modules_lists_the_cipher_and_analysis_modules(self):
+        # v0.4.0 retired the four empty stub modules; only these two remain.
         body = client.get("/api/v1/modules").json()
 
         statuses = {m["slug"]: m["status"] for m in body}
-        assert statuses == {
-            "logic": "planned",
-            "sets": "planned",
-            "combinatorics": "planned",
-            "graphs": "planned",
-            "algebra": "in_progress",
-        }
+        assert statuses == {"algebra": "available", "analysis": "available"}
 
     def test_openapi_documents_the_four_cipher_endpoints(self):
         paths = client.get("/openapi.json").json()["paths"]

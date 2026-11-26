@@ -1,204 +1,275 @@
-@import '@fontsource/rajdhani/600.css';
-@import '@fontsource/rajdhani/700.css';
-@import '@fontsource-variable/nunito';
+@import '@fontsource-variable/space-grotesk';
+@import '@fontsource-variable/inter';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
 @import 'tailwindcss';
 
 /*
- * DISCRETA design system: "Aurora".
+ * DISCRETA design system: "Instrument".
  *
- * Based on the Dribbble "UI Animation" reference supplied for the project: a light, airy
- * lavender-grey ground washed with pale pink and icy blue, soft near-white translucent panels
- * with diffuse violet-tinted shadows, thin hairlines, pastel iridescent accents, a squared
- * display face over a rounded text face, and unhurried motion.
+ * A precision instrument with the restraint of a case file. Warm paper-like neutrals, one
+ * orange accent used only for the primary action, the active destination and the findings
+ * that matter, and a monospaced face for anything that is data (ciphertext, keys, formulas).
  *
- * Every page uses these semantic tokens, so a component never hard-codes a colour. Text colours
- * were checked for WCAG AA contrast (4.5:1) on `canvas`, `surface` and `raised`.
+ * Every colour is a semantic token with a light and a dark value, switched by the
+ * `data-theme` attribute on <html> (set by the ThemeProvider). Components never hard-code a
+ * colour. Text tokens were checked for WCAG AA contrast (4.5:1) on `canvas`, `surface` and
+ * `surface-2`; `accent-ink` is the accent as *text*, and `accent-solid` is the accent as a
+ * button fill, because the brightest orange alone does not reach 4.5:1 with small text.
  */
-@theme {
-  --font-sans: 'Nunito Variable', ui-sans-serif, system-ui, 'Segoe UI', Roboto, sans-serif;
-  --font-display: 'Rajdhani', 'Segoe UI', ui-sans-serif, sans-serif;
-  --font-serif: 'Cambria Math', Cambria, 'Times New Roman', ui-serif, serif;
-  --font-mono: ui-monospace, 'Cascadia Code', 'SFMono-Regular', Menlo, Consolas, monospace;
 
-  --color-canvas: #dadbed;
-  --color-surface: #eef0f9;
-  --color-raised: #f6f7fc;
-  --color-line: #cdd0e8;
-  --color-line-strong: #b4b8da;
+:root,
+:root[data-theme='light'] {
+  color-scheme: light;
+  --c-canvas: #eae8e0;
+  --c-surface: #f7f6f0;
+  --c-surface-2: #e2e0d7;
+  --c-fg: #242620;
+  --c-fg-muted: #626359;
+  --c-line: #d0cec2;
+  --c-line-strong: #b9b6a8;
+  --c-accent: #d45b37;
+  --c-accent-ink: #a93f1e;
+  --c-accent-solid: #bc4a27;
+  --c-on-accent: #ffffff;
+  --c-slate: #777f78;
+  --c-slate-ink: #4f564f;
+  --c-ok: #2f6b4a;
+  --c-warn: #8a5a00;
+  --c-err: #a8321f;
+  --glass-bg: rgb(247 246 240 / 0.74);
+  --glass-border: rgb(36 38 32 / 0.13);
+  --glass-hover: rgb(36 38 32 / 0.06);
+  --glass-active: rgb(36 38 32 / 0.085);
+  --glass-sheen: rgb(255 255 255 / 0.4);
+  --atmo-ink: rgb(36 38 32 / 0.2);
+  --atmo-line: rgb(36 38 32 / 0.05);
+  --atmo-line-strong: rgb(36 38 32 / 0.14);
+  --atmo-accent: rgb(212 91 55 / 0.4);
+  --glass-shadow:
+    0 1px 0 rgb(255 255 255 / 0.65) inset, 0 12px 32px -10px rgb(36 38 32 / 0.32),
+    0 2px 6px -2px rgb(36 38 32 / 0.16);
+}
 
-  --color-fg: #23263a;
-  --color-fg-muted: #4c506a;
-  --color-fg-subtle: #555a75;
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --c-canvas: #171a19;
+  --c-surface: #222725;
+  --c-surface-2: #292f2c;
+  --c-fg: #e9e8df;
+  --c-fg-muted: #a1a69d;
+  --c-line: #353c39;
+  --c-line-strong: #48514d;
+  --c-accent: #e47b50;
+  --c-accent-ink: #ee8f67;
+  --c-accent-solid: #e47b50;
+  --c-on-accent: #171a19;
+  --c-slate: #91a49a;
+  --c-slate-ink: #b5c4bb;
+  --c-ok: #84c49d;
+  --c-warn: #dcab4a;
+  --c-err: #f08a76;
+  --glass-bg: rgb(34 39 37 / 0.72);
+  --glass-border: rgb(233 232 223 / 0.13);
+  --glass-hover: rgb(233 232 223 / 0.07);
+  --glass-active: rgb(233 232 223 / 0.1);
+  --glass-sheen: rgb(255 255 255 / 0.055);
+  --atmo-ink: rgb(145 164 154 / 0.3);
+  --atmo-line: rgb(145 164 154 / 0.06);
+  --atmo-line-strong: rgb(145 164 154 / 0.17);
+  --atmo-accent: rgb(228 123 80 / 0.42);
+  --glass-shadow:
+    0 1px 0 rgb(255 255 255 / 0.06) inset, 0 14px 36px -10px rgb(0 0 0 / 0.65),
+    0 2px 8px -2px rgb(0 0 0 / 0.4);
+}
 
-  --color-accent: #4f3fc4;
-  --color-accent-strong: #3b2d9e;
-  --color-accent-wash: #4f3fc41f;
+@theme inline {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Space Grotesk Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Code', Menlo, Consolas, monospace;
 
-  --color-ok: #08665b;
-  --color-warn: #8a5200;
-  --color-err: #a8231b;
+  --color-canvas: var(--c-canvas);
+  --color-surface: var(--c-surface);
+  --color-surface-2: var(--c-surface-2);
+  --color-fg: var(--c-fg);
+  --color-fg-muted: var(--c-fg-muted);
+  --color-line: var(--c-line);
+  --color-line-strong: var(--c-line-strong);
+  --color-accent: var(--c-accent);
+  --color-accent-ink: var(--c-accent-ink);
+  --color-accent-solid: var(--c-accent-solid);
+  --color-on-accent: var(--c-on-accent);
+  --color-slate: var(--c-slate);
+  --color-slate-ink: var(--c-slate-ink);
+  --color-ok: var(--c-ok);
+  --color-warn: var(--c-warn);
+  --color-err: var(--c-err);
 
-  /* Iridescent accents for illustrations and highlights; never used for body text. */
-  --color-iris-blue: #64a2d9;
-  --color-iris-violet: #7b5cd6;
-  --color-iris-pink: #e879a6;
-  --color-iris-mint: #5fd0c2;
-  --color-iris-peach: #f3c9d8;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
 
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 @layer base {
   html {
-    color-scheme: light;
-    background-color: var(--color-canvas);
+    background-color: var(--c-canvas);
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
     margin: 0;
     min-height: 100dvh;
-    color: var(--color-fg);
+    color: var(--c-fg);
+    background-color: var(--c-canvas);
     font-family: var(--font-sans);
+    font-size: 0.9375rem;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-    background-color: var(--color-canvas);
-    /* The ambient wash: lavender top-left, icy blue top-right, pale pink bottom-right. */
-    background-image:
-      radial-gradient(900px 640px at 0% 0%, #d2ccf0 0%, transparent 62%),
-      radial-gradient(760px 600px at 100% 6%, #e3e6f1 0%, transparent 60%),
-      radial-gradient(900px 700px at 100% 100%, #f1d3e3 0%, transparent 58%),
-      radial-gradient(700px 520px at 0% 100%, #dfe9ee 0%, transparent 60%);
-    background-attachment: fixed;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.015em;
+    line-height: 1.15;
+    font-weight: 600;
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 2px solid var(--c-accent);
     outline-offset: 2px;
-    border-radius: 6px;
   }
 
   ::selection {
-    background-color: var(--color-accent-wash);
-    color: var(--color-accent-strong);
+    background-color: color-mix(in srgb, var(--c-accent) 32%, transparent);
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    ::before,
-    ::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
+  /* Native form controls follow the theme. */
+  textarea,
+  input,
+  select,
+  button {
+    font: inherit;
+    color: inherit;
   }
-}
-
-/* React Flow theming (used by the Secure Message Journey diagram). */
-.discreta-flow {
-  --xy-background-color: transparent;
-  --xy-node-background-color: var(--color-raised);
-  --xy-node-color: var(--color-fg);
-  --xy-node-border: 1px solid #ffffffb8;
-  --xy-node-border-radius: 14px;
-  --xy-node-boxshadow-default: inset 0 1px 0 #ffffffd9, 0 10px 22px -12px rgb(66 56 150 / 0.45);
-  --xy-edge-stroke: var(--color-iris-violet);
-  --xy-edge-stroke-width: 1.5;
-  --xy-attribution-background-color: transparent;
-  font-family: var(--font-sans);
-}
-
-.discreta-flow .react-flow__attribution a {
-  color: var(--color-fg-subtle);
 }
 
 @layer components {
-  /* The basic surface: a soft, near-white, translucent panel with a faint top highlight and a
-     long, diffuse, violet-tinted shadow. Restrained border, no heavy blur. */
-  .aurora-tile {
-    background: color-mix(in srgb, var(--color-surface) 80%, transparent);
-    border: 1px solid color-mix(in srgb, #ffffff 72%, transparent);
-    border-radius: 1.25rem;
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.85),
-      0 18px 36px -22px rgb(66 56 150 / 0.4);
+  .btn {
+    display: inline-flex;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--c-line-strong);
+    background-color: transparent;
+    padding: 0 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--c-fg);
+    cursor: pointer;
+    transition:
+      background-color 150ms var(--ease-out-quart),
+      border-color 150ms var(--ease-out-quart),
+      color 150ms var(--ease-out-quart),
+      transform 150ms var(--ease-out-quart);
+  }
+  .btn:hover:not(:disabled) {
+    background-color: var(--c-surface-2);
+  }
+  .btn:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  .btn-sm {
+    height: 2rem;
+    padding: 0 0.75rem;
+    font-size: 0.8125rem;
+  }
+  .btn-primary {
+    border-color: transparent;
+    background-color: var(--c-accent-solid);
+    color: var(--c-on-accent);
+    font-weight: 600;
+  }
+  .btn-primary:hover:not(:disabled) {
+    background-color: var(--c-accent-solid);
+    filter: brightness(1.07);
+  }
+  .btn-ghost {
+    border-color: transparent;
+    color: var(--c-fg-muted);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    color: var(--c-fg);
   }
 
-  /* Small raised control surface: segmented buttons, steppers, chips, pills. */
-  .aurora-chip {
-    background: color-mix(in srgb, var(--color-raised) 92%, transparent);
-    border: 1px solid color-mix(in srgb, #ffffff 80%, transparent);
-    box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.9),
-      0 6px 14px -8px rgb(66 56 150 / 0.45);
+  .field {
+    width: 100%;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--c-line-strong);
+    background-color: var(--c-surface);
+    padding: 0.5rem 0.75rem;
+    transition: border-color 150ms var(--ease-out-quart);
+  }
+  .field::placeholder {
+    color: var(--c-fg-muted);
+    opacity: 0.8;
+  }
+  .field:hover {
+    border-color: var(--c-fg-muted);
+  }
+  .field:focus-visible {
+    outline: 2px solid var(--c-accent);
+    outline-offset: 1px;
+    border-color: var(--c-accent);
+  }
+  .field[aria-invalid='true'] {
+    border-color: var(--c-err);
   }
 
-  /* Pressed-in surface: text fields and tracks. */
-  .aurora-inset {
-    background: color-mix(in srgb, var(--color-canvas) 38%, var(--color-raised));
-    box-shadow: inset 0 2px 5px rgb(66 56 150 / 0.12);
-    border: 1px solid color-mix(in srgb, var(--color-line) 70%, transparent);
+  /* An editing or result surface: the few places that deserve a boxed panel. */
+  .panel {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--c-line);
+    background-color: var(--c-surface);
   }
 
-  /* The one primary action style: iridescent gradient with a soft coloured glow. */
-  .aurora-primary {
-    background-image: linear-gradient(135deg, var(--color-iris-blue), var(--color-iris-violet) 55%, var(--color-iris-pink));
-    color: #ffffff;
-    box-shadow:
-      0 14px 26px -12px rgb(91 67 214 / 0.7),
-      inset 0 1px 0 rgb(255 255 255 / 0.45);
+  .glass {
+    /* A faint sheen across the top edge: the restrained reflection of a glass surface. */
+    background-image: linear-gradient(180deg, var(--glass-sheen), transparent 55%);
+    background-color: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    -webkit-backdrop-filter: blur(14px) saturate(1.15);
+    backdrop-filter: blur(14px) saturate(1.15);
   }
-}
 
-/* Staged entrance, like the reference: panels fade up out of a soft blur, one after another. */
-@keyframes aurora-rise {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-    filter: blur(4px);
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
   }
-  to {
-    opacity: 1;
-    transform: none;
-    filter: none;
-  }
-}
 
-@keyframes aurora-letter {
-  from {
-    opacity: 0;
-    transform: translateY(5px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes aurora-swap {
-  from {
-    opacity: 0.15;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes aurora-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-6px);
+  .caption {
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--c-fg-muted);
   }
 }
 
 @keyframes page-enter {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -206,27 +277,288 @@
   }
 }
 
-.aurora-rise {
-  animation: aurora-rise 560ms var(--ease-out-quart) both;
-  animation-delay: calc(var(--rise-i, 0) * 70ms);
+@keyframes result-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
-.aurora-swap {
-  animation: aurora-swap 380ms ease-out both;
-}
-
-.aurora-letter {
-  display: inline-block;
-  animation: aurora-letter 280ms var(--ease-out-quart) both;
-  animation-delay: calc(var(--i, 0) * 14ms);
-}
-
-/* The focal illustration drifts very slightly; the only continuous motion in the app. */
-.aurora-float {
-  animation: aurora-float 7s ease-in-out infinite;
-}
-
-/* Route change: the new page eases in. */
 .page-enter {
-  animation: page-enter 320ms var(--ease-out-quart) both;
+  animation: page-enter 240ms var(--ease-out-quart) both;
+}
+.result-enter {
+  animation: result-enter 200ms var(--ease-out-quart) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Without backdrop-filter support the glass must stay readable. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass {
+    background-color: var(--c-surface);
+  }
+}
+
+/*
+ * Atmosphere: the decorative background layer (components/atmosphere). It never receives
+ * pointer events or focus, only animates transform and opacity, lives in the empty side
+ * margins of wide screens, and stops entirely under reduced motion or in a hidden tab.
+ */
+.atmo {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  contain: layout paint;
+  font-family: var(--font-mono);
+}
+
+/* A very faint technical grid with a finer sub-grid; static, so it costs nothing. */
+.atmo-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, var(--atmo-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--atmo-line) 1px, transparent 1px);
+  background-size: 64px 64px;
+  background-position: center top;
+}
+
+/* Margins only: nothing animated is ever placed behind the content column. */
+.atmo-gutter {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: none;
+  width: calc(50% - 36rem);
+  overflow: hidden;
+}
+.atmo-gutter-left {
+  left: 0;
+}
+.atmo-gutter-right {
+  right: 0;
+}
+@media (min-width: 1300px) {
+  .atmo-gutter {
+    display: block;
+  }
+}
+
+.atmo-stream {
+  position: absolute;
+  top: 0;
+  width: 2.2rem;
+  color: var(--atmo-ink);
+  font-size: 10px;
+  line-height: 16px;
+  letter-spacing: 0.04em;
+  text-align: center;
+  mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+}
+.atmo-stream pre {
+  margin: 0;
+  font: inherit;
+}
+/* Two identical copies stacked; moving the track by half its height loops seamlessly. */
+.atmo-track {
+  animation: atmo-scroll 150s linear infinite;
+  will-change: transform;
+}
+.atmo-stream-reverse .atmo-track {
+  animation-direction: reverse;
+}
+@keyframes atmo-scroll {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+.atmo-gutter-left .atmo-stream {
+  left: 0.75rem;
+}
+.atmo-gutter-right .atmo-stream {
+  right: 0.75rem;
+}
+
+/* Labels, binary groups and the status tag sit inside the stream, never over it, and only
+   where the margin is wide enough to hold both. */
+.atmo-slot,
+.atmo-binary {
+  position: absolute;
+  display: none;
+  justify-content: center;
+}
+.atmo-gutter-left .atmo-slot,
+.atmo-gutter-left .atmo-binary {
+  left: 3.6rem;
+  right: 0.25rem;
+}
+.atmo-gutter-right .atmo-slot,
+.atmo-gutter-right .atmo-binary {
+  left: 0.25rem;
+  right: 3.6rem;
+}
+@media (min-width: 1500px) {
+  .atmo-slot {
+    display: flex;
+  }
+  .atmo-binary {
+    display: block;
+  }
+}
+
+.atmo-label {
+  display: block;
+  max-width: 4.6rem;
+  color: var(--atmo-ink);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  line-height: 1.5;
+  text-align: center;
+  text-transform: none;
+  animation: atmo-label 7s ease-in-out both;
+}
+@keyframes atmo-label {
+  0% {
+    opacity: 0;
+  }
+  15%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.atmo-binary {
+  color: var(--atmo-accent);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-align: center;
+  opacity: 0;
+  animation: atmo-binary 12s ease-in-out infinite;
+}
+@keyframes atmo-binary {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  25%,
+  55% {
+    opacity: 0.8;
+  }
+}
+
+.atmo-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 3.5rem;
+}
+.atmo-bars span {
+  width: 2px;
+  background: var(--atmo-line-strong);
+  transform-origin: bottom;
+  animation: atmo-bar 9s ease-in-out infinite;
+}
+@keyframes atmo-bar {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.62);
+  }
+}
+
+.atmo-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--atmo-ink);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+}
+.atmo-status i {
+  width: 5px;
+  height: 5px;
+  border-radius: 9999px;
+  background: var(--atmo-line-strong);
+}
+.atmo-status[data-busy='true'] i {
+  background: var(--atmo-accent);
+}
+
+/* The network motif on the Overview. */
+.atmo-network {
+  mask-image: linear-gradient(to left, #000 45%, transparent);
+  -webkit-mask-image: linear-gradient(to left, #000 45%, transparent);
+}
+.atmo-net-lines path {
+  stroke: var(--atmo-line-strong);
+}
+.atmo-net-nodes circle {
+  fill: var(--c-canvas);
+  stroke: var(--atmo-line-strong);
+  stroke-width: 1;
+}
+.atmo-net-text {
+  fill: var(--atmo-ink);
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+}
+.atmo-net-pulses path {
+  stroke: var(--atmo-accent);
+  stroke-dasharray: 5 95;
+  stroke-dashoffset: 5;
+  animation: atmo-pulse 10s linear infinite;
+}
+@keyframes atmo-pulse {
+  from {
+    stroke-dashoffset: 5;
+  }
+  to {
+    stroke-dashoffset: -95;
+  }
+}
+
+/* Paused while the tab is hidden; static when motion is reduced. */
+.atmo[data-paused='true'] *,
+.atmo-network[data-paused='true'] * {
+  animation-play-state: paused !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .atmo *,
+  .atmo-network *,
+  .atmo-network {
+    animation: none !important;
+  }
+  .atmo-binary {
+    opacity: 0;
+  }
+  .atmo-net-pulses {
+    display: none;
+  }
 }

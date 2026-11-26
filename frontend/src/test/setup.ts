@@ -6,30 +6,24 @@ afterEach(() => {
   cleanup()
   vi.restoreAllMocks()
   vi.unstubAllGlobals()
+  window.localStorage.clear()
+  document.documentElement.removeAttribute('data-theme')
 })
 
-// jsdom has no canvas or WebGL. Report "no context" quietly so the sculptures use their SVG
-// fallbacks, and provide the observers that React Flow and the sculptures expect.
+// jsdom has no matchMedia; report a light, motion-allowed system by default.
 beforeEach(() => {
-  vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(() => null)
   vi.stubGlobal(
-    'ResizeObserver',
-    class {
-      observe() {}
-      unobserve() {}
-      disconnect() {}
-    },
-  )
-  vi.stubGlobal(
-    'IntersectionObserver',
-    class {
-      observe() {}
-      unobserve() {}
-      disconnect() {}
-      takeRecords() {
-        return []
-      }
-    },
+    'matchMedia',
+    (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      addListener: () => {},
+      removeListener: () => {},
+      dispatchEvent: () => false,
+    }),
   )
   window.scrollTo = () => {}
 })

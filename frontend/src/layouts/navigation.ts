@@ -1,40 +1,30 @@
-import { BookOpenText, ChartColumn, KeyRound, LayoutDashboard, Route } from 'lucide-react'
-import { labModules, labPath } from '../modules'
-import type { NavGroup, NavItem } from '../types'
+import { FlaskConical, House, KeyRound, Settings } from 'lucide-react'
+import type { NavItem } from '../types'
 
-export const CIPHER_LAB_PATH = '/cipher-lab'
-export const FREQUENCY_ANALYZER_PATH = '/frequency-analyzer'
-export const SECURE_JOURNEY_PATH = '/secure-message-journey'
-export const THEORY_PATH = '/theory'
+export const OVERVIEW_PATH = '/'
+export const WORKSPACE_PATH = '/workspace'
+export const ANALYSIS_PATH = '/analysis'
+export const SETTINGS_PATH = '/settings'
 
-export const cryptoNavItems: NavItem[] = [
-  { label: 'Cipher Laboratory', to: CIPHER_LAB_PATH, icon: KeyRound },
-  { label: 'Frequency Analyzer', to: FREQUENCY_ANALYZER_PATH, icon: ChartColumn },
-  { label: 'Secure Message Journey', to: SECURE_JOURNEY_PATH, icon: Route },
+/**
+ * The four destinations of the floating taskbar, and the only navigation in the app.
+ * `shortLabel` is shown on narrow screens, where the full label does not fit.
+ */
+export const navItems: NavItem[] = [
+  { label: 'Overview', shortLabel: 'Overview', to: OVERVIEW_PATH, icon: House, end: true },
+  { label: 'Cipher Workspace', shortLabel: 'Workspace', to: WORKSPACE_PATH, icon: KeyRound },
+  { label: 'Analysis Lab', shortLabel: 'Analysis', to: ANALYSIS_PATH, icon: FlaskConical },
+  { label: 'Settings', shortLabel: 'Settings', to: SETTINGS_PATH, icon: Settings },
 ]
 
-export const navGroups: NavGroup[] = [
-  {
-    label: 'Overview',
-    items: [{ label: 'Dashboard', to: '/', icon: LayoutDashboard, end: true }],
-  },
-  {
-    label: 'Mathematical laboratories',
-    items: labModules.map((m) => ({ label: m.title, to: labPath(m.id), icon: m.icon })),
-  },
-  {
-    label: 'Cryptography',
-    items: cryptoNavItems,
-  },
-  {
-    label: 'Reference',
-    items: [{ label: 'Theory & Proofs', to: THEORY_PATH, icon: BookOpenText }],
-  },
-]
+/** Routes from earlier versions, kept so old links land somewhere useful. */
+export const legacyRedirects: Record<string, string> = {
+  '/cipher-lab': WORKSPACE_PATH,
+  '/frequency-analyzer': ANALYSIS_PATH,
+}
 
-const allItems: NavItem[] = navGroups.flatMap((g) => g.items)
-
-/** Page title for the header, derived from the current pathname. */
+/** Document title for a path, e.g. "Cipher Workspace · DISCRETA". */
 export function titleForPath(pathname: string): string {
-  return allItems.find((i) => i.to === pathname)?.label ?? 'DISCRETA'
+  const item = navItems.find((i) => i.to === pathname)
+  return item ? (item.to === OVERVIEW_PATH ? 'DISCRETA' : `${item.label} · DISCRETA`) : 'Not found · DISCRETA'
 }

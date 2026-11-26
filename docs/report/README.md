@@ -12,9 +12,14 @@ Suggested outline:
 6. Evaluation, limitations and future work
 7. References
 
-## Screenshots (v0.3.0)
+## Progress
 
-`screenshots-v0.3.0/` (kept locally, not committed: about 13 MB of PNG) holds full-page captures of every page at desktop (1440 px) and mobile
-(375 px) widths, plus the Cipher Laboratory in its main states: Caesar encrypted, affine
-decrypted (showing the backend's modular inverse), an invalid multiplier, and the backend
-offline. They were taken against the real backend.
+[progress-report.md](progress-report.md) summarises what has been built and verified so far.
+
+## Screenshots
+
+* `screenshots-v0.4.0/` (current, kept locally and not committed) holds the Overview, Cipher Workspace (Caesar,
+  affine, invalid multiplier), Analysis Lab (frequency, Caesar, affine) and Settings pages at 375, 768, 1024 and
+  1440 px in the light and dark themes, plus two wide shots (1680 px) showing the background layer. They were
+  taken against the real backend.
+* `screenshots-v0.3.0/` is the superseded earlier design.

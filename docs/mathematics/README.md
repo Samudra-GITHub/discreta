@@ -19,12 +19,11 @@ One file per topic, each containing:
 
 | Note | Core content |
 | --- | --- |
-| [Caesar and affine ciphers](caesar-and-affine.md) | ℤ₂₆ encoding, modular arithmetic, Caesar and affine derivations, gcd and coprimality, extended Euclid, modular inverses, worked examples, error handling and security notes (implemented in v0.2.0, corrected in v0.2.1) |
+| [Caesar and affine ciphers](caesar-and-affine.md) | ℤ₂₆ encoding, modular arithmetic, Caesar and affine derivations, gcd and coprimality, extended Euclid, modular inverses, worked examples, error handling and security notes (v0.2.0, corrected in v0.2.1) |
+| [Frequency analysis and statistical key search](frequency-analysis.md) | Letter counts and character treatment, the English reference, the χ² statistic, why trying every key works, Caesar (26 keys) and affine (312 keys) ranking, reliability and limits (v0.4.0) |
 
-## Planned: cipher and frequency analysis topic
+## Not yet written
 
 | Note | Core content |
 | --- | --- |
-| Vigenère cipher | Repeated Caesar shifts under a keyword of length m |
-| Frequency analysis | Letter counts; index of coincidence IC = Σ nᵢ(nᵢ − 1) / (N(N − 1)) |
-| Key-space and attacks | Counting keys; why monoalphabetic ciphers fall to frequency analysis |
+| Vigenère cipher, Kasiski examination, index of coincidence | Repeated Caesar shifts under a keyword of length m; IC = Σ nᵢ(nᵢ − 1) / (N(N − 1)). Not implemented, so not documented. |

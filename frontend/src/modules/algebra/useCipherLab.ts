@@ -8,7 +8,6 @@ import {
   MAX_TEXT_LENGTH,
   parseKey,
   textLength,
-  type CipherParams,
   type KeyParse,
   type MultiplierCheck,
 } from './cipherMath'
@@ -45,8 +44,6 @@ export interface CipherLab {
     multiplier: MultiplierCheck | null
     /** Message to show next to each field, if any. Backend messages are merged in after a run. */
     messages: Partial<Record<LabField, string>>
-    /** Parameters for the alphabet dial preview; null while the key is incomplete or invalid. */
-    params: CipherParams | null
   }
   canRun: boolean
   /** True when a result exists but the inputs have changed since it was produced. */
@@ -60,6 +57,10 @@ export interface CipherLab {
   clear: () => void
   /** Move the latest result into the input box and flip encrypt/decrypt. */
   reuseResult: () => void
+  /** Replace several inputs at once (for example a candidate sent from the Analysis Lab). */
+  load: (patch: Partial<LabInputs>) => void
+  /** Back to the initial inputs, discarding any result. */
+  reset: () => void
   /** Call the backend. Only ever invoked by an explicit user action. */
   execute: () => Promise<void>
 }
@@ -98,11 +99,7 @@ export function useCipherLab(initial: Partial<LabInputs> = {}): CipherLab {
       if (!b.ok) messages.b = describeKeyProblem(b.problem, 'The offset b')
     }
 
-    let params: CipherParams | null = null
-    if (inputs.cipher === 'caesar' && key.ok) params = { cipher: 'caesar', k: key.big }
-    if (inputs.cipher === 'affine' && a.ok && b.ok) params = { cipher: 'affine', a: a.big, b: b.big }
-
-    return { textLength: length, textTooLong: length > MAX_TEXT_LENGTH, key, a, b, multiplier, messages, params }
+    return { textLength: length, textTooLong: length > MAX_TEXT_LENGTH, key, a, b, multiplier, messages }
   }, [inputs])
 
   const canRun =
@@ -185,6 +182,21 @@ export function useCipherLab(initial: Partial<LabInputs> = {}): CipherLab {
     resetRun()
   }, [run, resetRun])
 
+  const load = useCallback(
+    (patch: Partial<LabInputs>) => {
+      setInputs((current) => ({ ...current, ...patch }))
+      resetRun()
+    },
+    [resetRun],
+  )
+
+  const reset = useCallback(() => {
+    setInputs({ ...INITIAL, ...initial })
+    resetRun()
+    // `initial` is only the starting value; resetting always returns to it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetRun])
+
   const execute = useCallback(async () => {
     if (!canRun) return
     controllerRef.current?.abort()
@@ -237,6 +249,8 @@ export function useCipherLab(initial: Partial<LabInputs> = {}): CipherLab {
     nudge,
     clear,
     reuseResult,
+    load,
+    reset,
     execute,
   }
 }

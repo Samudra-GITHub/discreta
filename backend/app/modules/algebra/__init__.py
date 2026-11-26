@@ -10,8 +10,8 @@ from app.modules.base import ModuleInfo
 INFO = ModuleInfo(
     slug="algebra",
     title="Algebra",
-    summary="Modular arithmetic, number theory and algebraic structures behind ciphers.",
-    status="in_progress",
+    summary="Modular arithmetic and the Caesar and affine ciphers over Z_26.",
+    status="available",
 )
 
 __all__ = ["INFO", "router"]

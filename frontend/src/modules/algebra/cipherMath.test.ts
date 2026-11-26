@@ -5,11 +5,8 @@ import {
   checkMultiplier,
   collisionFor,
   describeKeyProblem,
-  encryptionMap,
   gcd,
-  letterOf,
   mod26,
-  operationMap,
   parseKey,
   textLength,
   VALID_MULTIPLIERS,
@@ -149,54 +146,6 @@ describe('collisionFor (why an invalid multiplier cannot be decrypted)', () => {
   })
 })
 
-describe('alphabet maps', () => {
-  const word = (map: number[], text: string) => [...text].map((c) => letterOf(map[c.charCodeAt(0) - 65] ?? 0)).join('')
-
-  it('Caesar encryption rotates the alphabet', () => {
-    const map = encryptionMap({ cipher: 'caesar', k: 3n })
-    expect(map && word(map, 'HELLO')).toBe('KHOOR')
-    const wrap = encryptionMap({ cipher: 'caesar', k: 3n })
-    expect(wrap && word(wrap, 'XYZ')).toBe('ABC')
-  })
-
-  it('Caesar maps reduce negative and oversized keys', () => {
-    expect(encryptionMap({ cipher: 'caesar', k: -3n })).toEqual(encryptionMap({ cipher: 'caesar', k: 23n }))
-    expect(encryptionMap({ cipher: 'caesar', k: 29n })).toEqual(encryptionMap({ cipher: 'caesar', k: 3n }))
-    expect(encryptionMap({ cipher: 'caesar', k: 0n })).toEqual(Array.from({ length: 26 }, (_, i) => i))
-  })
-
-  it('affine encryption matches the classic example', () => {
-    const map = encryptionMap({ cipher: 'affine', a: 5n, b: 8n })
-    expect(map && word(map, 'AFFINE')).toBe('IHHWVC')
-  })
-
-  it('affine maps are permutations for every valid multiplier and b', () => {
-    for (const a of VALID_MULTIPLIERS) {
-      for (const b of [0, 1, 7, 25, 26, -1]) {
-        const map = encryptionMap({ cipher: 'affine', a: BigInt(a), b: BigInt(b) })
-        expect(new Set(map).size, `a=${a} b=${b}`).toBe(26)
-      }
-    }
-  })
-
-  it('has no map for an invalid multiplier', () => {
-    expect(encryptionMap({ cipher: 'affine', a: 4n, b: 1n })).toBeNull()
-    expect(operationMap({ cipher: 'affine', a: 13n, b: 0n }, 'decrypt')).toBeNull()
-  })
-
-  it('decryption undoes encryption', () => {
-    for (const params of [
-      { cipher: 'caesar', k: 11n } as const,
-      { cipher: 'affine', a: 7n, b: 3n } as const,
-      { cipher: 'affine', a: 25n, b: 25n } as const,
-    ]) {
-      const enc = operationMap(params, 'encrypt') ?? []
-      const dec = operationMap(params, 'decrypt') ?? []
-      for (let x = 0; x < 26; x += 1) expect(dec[enc[x] ?? 0]).toBe(x)
-    }
-  })
-})
-
 describe('buildWorkedExample', () => {
   it('shows Caesar encryption with the reduced key from the response', () => {
     const example = buildWorkedExample(caesar({}))
@@ -290,57 +239,5 @@ describe('buildWorkedExample', () => {
     expect(buildWorkedExample(caesar({ effective_key: 26 }))).toEqual({ status: 'unverified' })
     expect(buildWorkedExample(affine({ a_inverse: 20 }))).toEqual({ status: 'unverified' })
     expect(buildWorkedExample(affine({ effective_a: 4, a_inverse: 7 }))).toEqual({ status: 'unverified' })
-  })
-})
-
-describe('teaching helpers for the theory page', () => {
-  it('lists the Euclidean division steps for 26 and 7', async () => {
-    const { euclidRows } = await import('./cipherMath')
-    expect(euclidRows(26, 7)).toEqual([
-      { dividend: 26, divisor: 7, quotient: 3, remainder: 5 },
-      { dividend: 7, divisor: 5, quotient: 1, remainder: 2 },
-      { dividend: 5, divisor: 2, quotient: 2, remainder: 1 },
-      { dividend: 2, divisor: 1, quotient: 2, remainder: 0 },
-    ])
-  })
-
-  it('every division step satisfies dividend = quotient · divisor + remainder', async () => {
-    const { euclidRows } = await import('./cipherMath')
-    for (let a = 1; a <= 60; a += 1) {
-      for (let b = 1; b <= 60; b += 1) {
-        for (const row of euclidRows(a, b)) {
-          expect(row.dividend).toBe(row.quotient * row.divisor + row.remainder)
-          expect(row.remainder).toBeLessThan(row.divisor)
-        }
-      }
-    }
-  })
-
-  it('returns no steps for invalid input', async () => {
-    const { euclidRows } = await import('./cipherMath')
-    expect(euclidRows(-1, 5)).toEqual([])
-    expect(euclidRows(5, 0)).toEqual([])
-    expect(euclidRows(1.5, 2)).toEqual([])
-  })
-
-  it('finds Bezout coefficients: 26·3 + 7·(−11) = 1', async () => {
-    const { bezout } = await import('./cipherMath')
-    expect(bezout(26, 7)).toEqual({ g: 1, x: 3, y: -11 })
-    for (let a = 1; a <= 50; a += 1) {
-      for (let b = 1; b <= 50; b += 1) {
-        const { g, x, y } = bezout(a, b)
-        expect(a * x + b * y).toBe(g)
-      }
-    }
-  })
-
-  it('shows that a multiplier sharing a factor with 26 loses results, and a valid one does not', async () => {
-    const { multiplicationTable } = await import('./cipherMath')
-    const four = multiplicationTable(4)
-    expect(four.hits.filter((n) => n === 0)).toHaveLength(13)
-    expect(four.hits.filter((n) => n === 2)).toHaveLength(13)
-    const five = multiplicationTable(5)
-    expect(five.hits.every((n) => n === 1)).toBe(true)
-    expect(five.images[3]).toBe(15)
   })
 })

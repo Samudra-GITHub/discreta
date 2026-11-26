@@ -1,200 +1,141 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router-dom'
-import { describe, expect, it, vi } from 'vitest'
-import App from './App'
+import { screen, within } from '@testing-library/react'
+import { describe, expect, it } from 'vitest'
+import { mockBackend, renderApp } from './test/helpers'
 
-const health = {
-  status: 'ok',
-  service: 'discreta-backend',
-  version: '0.3.0',
-  message: 'DISCRETA backend is running.',
-  timestamp: '2026-11-25T00:00:00Z',
-}
-
-function renderAt(path: string, backendUp = true) {
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(async () => {
-      if (!backendUp) throw new TypeError('Failed to fetch')
-      return new Response(JSON.stringify(health), { status: 200, headers: { 'Content-Type': 'application/json' } })
-    }),
-  )
-  return render(
-    <MemoryRouter initialEntries={[path]}>
-      <App />
-    </MemoryRouter>,
-  )
-}
-
-const heading = () => screen.getByRole('heading', { level: 1 })
-
-describe('every page renders inside the shared shell', () => {
-  const pages: [string, RegExp][] = [
-    ['/', /DISCRETA/],
-    ['/labs/logic', /Logic/],
-    ['/labs/sets', /Sets/],
-    ['/labs/combinatorics', /Combinatorics/],
-    ['/labs/graphs', /Graphs/],
-    ['/labs/algebra', /Algebra/],
-    ['/frequency-analyzer', /Frequency Analyzer/],
-    ['/theory', /Theory & Proofs/],
-    ['/no/such/page', /Page not found/],
-  ]
-
-  it.each(pages)('%s', async (path, title) => {
-    renderAt(path)
-
-    await waitFor(() => expect(heading().textContent).toMatch(title))
-    expect(screen.getByRole('navigation', { name: 'Primary' })).toBeTruthy()
-    expect(screen.getByRole('main')).toBeTruthy()
-    expect(screen.getAllByText(/Backend|Checking/).length).toBeGreaterThan(0)
-  })
-
-  it('the Cipher Laboratory', async () => {
-    renderAt('/cipher-lab')
-
-    await waitFor(() => expect(heading().textContent).toMatch(/one letter at a time/i))
-    expect(screen.getByRole('radiogroup', { name: 'Cipher' })).toBeTruthy()
-  })
-
-  it('the Secure Message Journey (loaded lazily)', async () => {
-    renderAt('/secure-message-journey')
-
-    expect((await screen.findByRole('heading', { level: 1 })).textContent).toMatch(/Secure Message Journey/)
-    expect(screen.getByRole('img', { name: /Pipeline: plaintext/ })).toBeTruthy()
-  })
-
-  it('shows each mathematical module under its studio name', async () => {
-    const names: [string, string][] = [
-      ['/labs/logic', 'Logic Studio'],
-      ['/labs/sets', 'Set Explorer'],
-      ['/labs/combinatorics', 'Combinatorics Studio'],
-      ['/labs/graphs', 'Graph Lab'],
-      ['/labs/algebra', 'Algebra Lab'],
-    ]
-    for (const [path, name] of names) {
-      const { unmount } = renderAt(path)
-      expect(screen.getByText(name)).toBeTruthy()
-      unmount()
-    }
-  })
-})
-
-describe('navigation', () => {
-  it('links to every page: the dashboard, five modules, three cryptography tools and the theory page', () => {
-    renderAt('/')
+describe('floating taskbar', () => {
+  it('is the only navigation, with exactly the four destinations', () => {
+    mockBackend()
+    renderApp('/')
 
     const nav = screen.getByRole('navigation', { name: 'Primary' })
-    const hrefs = within(nav)
-      .getAllByRole('link')
-      .map((link) => link.getAttribute('href'))
-    expect(hrefs).toEqual([
-      '/',
-      '/labs/logic',
-      '/labs/sets',
-      '/labs/combinatorics',
-      '/labs/graphs',
-      '/labs/algebra',
-      '/cipher-lab',
-      '/frequency-analyzer',
-      '/secure-message-journey',
-      '/theory',
+    expect(screen.getAllByRole('navigation')).toHaveLength(1)
+    const links = within(nav).getAllByRole('link')
+    expect(links.map((l) => l.getAttribute('aria-label'))).toEqual([
+      'Overview',
+      'Cipher Workspace',
+      'Analysis Lab',
+      'Settings',
     ])
+    expect(links.map((l) => l.getAttribute('href'))).toEqual(['/', '/workspace', '/analysis', '/settings'])
   })
 
-  it('marks the current page', () => {
-    renderAt('/labs/graphs')
+  it('has no sidebar, header bar or second navigation', () => {
+    mockBackend()
+    const { container } = renderApp('/')
 
-    const current = within(screen.getByRole('navigation', { name: 'Primary' })).getByRole('link', { current: 'page' })
-    expect(current.getAttribute('href')).toBe('/labs/graphs')
+    expect(container.querySelector('aside')).toBeNull()
+    expect(container.querySelector('header nav')).toBeNull()
+    expect(screen.queryByText(/Logic Studio|Set Explorer|Graph Lab|Theory & Proofs|Secure Message Journey/)).toBeNull()
   })
 
-  it('moves between pages without a reload', async () => {
-    const user = userEvent.setup()
-    renderAt('/')
+  it('is fixed to the bottom of the viewport and respects the safe area', () => {
+    mockBackend()
+    renderApp('/')
 
-    await user.click(within(screen.getByRole('navigation', { name: 'Primary' })).getByRole('link', { name: 'Theory & Proofs' }))
-
-    await waitFor(() => expect(heading().textContent).toMatch(/Theory & Proofs/))
+    const wrapper = screen.getByRole('navigation', { name: 'Primary' }).parentElement as HTMLElement
+    expect(wrapper.className).toContain('fixed')
+    expect(wrapper.className).toContain('bottom-0')
+    expect(wrapper.className).toContain('env(safe-area-inset-bottom)')
   })
 
-  it('opens and closes the mobile drawer', async () => {
-    const user = userEvent.setup()
-    renderAt('/')
+  it('marks the current destination with aria-current and moves it on navigation', async () => {
+    mockBackend()
+    const { user } = renderApp('/')
+    const nav = screen.getByRole('navigation', { name: 'Primary' })
 
-    const open = screen.getByRole('button', { name: 'Open navigation' })
-    expect(open.getAttribute('aria-expanded')).toBe('false')
-    await user.click(open)
-    expect(open.getAttribute('aria-expanded')).toBe('true')
-    await user.click(screen.getByRole('button', { name: 'Close navigation' }))
-    expect(open.getAttribute('aria-expanded')).toBe('false')
-  })
-})
+    expect(within(nav).getByRole('link', { name: 'Overview' }).getAttribute('aria-current')).toBe('page')
+    await user.click(within(nav).getByRole('link', { name: 'Analysis Lab' }))
 
-describe('dashboard', () => {
-  it('lists the five modules and the three cryptography tools with honest statuses', () => {
-    renderAt('/')
-
-    const modules = screen.getByRole('region', { name: 'Five mathematical modules' })
-    expect(within(modules).getAllByRole('link')).toHaveLength(5)
-    expect(within(modules).getAllByText('Planned')).toHaveLength(4)
-    expect(within(modules).getAllByText('In progress')).toHaveLength(1)
-    const crypto = screen.getByRole('region', { name: /Cipher & frequency analysis/ })
-    expect(within(crypto).getByText('In progress')).toBeTruthy()
-    expect(within(crypto).getAllByText('Planned')).toHaveLength(2)
+    expect(within(nav).getByRole('link', { name: 'Analysis Lab' }).getAttribute('aria-current')).toBe('page')
+    expect(within(nav).getByRole('link', { name: 'Overview' }).getAttribute('aria-current')).toBeNull()
+    expect(screen.getByRole('heading', { level: 1, name: 'Analysis Lab' })).toBeTruthy()
   })
 
-  it('shows the backend as online only after a real health response', async () => {
-    renderAt('/')
+  it('is reachable by keyboard in order', async () => {
+    mockBackend()
+    const { user } = renderApp('/settings')
+    const nav = screen.getByRole('navigation', { name: 'Primary' })
+    const first = within(nav).getByRole('link', { name: 'Overview' })
 
-    expect(screen.getAllByText('Checking backend…').length).toBeGreaterThan(0)
-    await waitFor(() => expect(screen.getAllByText('Backend online').length).toBeGreaterThan(0))
-    expect(screen.getByText(/discreta-backend v0\.3\.0/)).toBeTruthy()
-  })
-
-  it('shows the backend as offline, with the start command, when it cannot be reached', async () => {
-    renderAt('/', false)
-
-    await waitFor(() => expect(screen.getAllByText('Backend offline').length).toBeGreaterThan(0))
-    expect(screen.getByText(/uvicorn app.main:app/)).toBeTruthy()
+    first.focus()
+    expect(document.activeElement).toBe(first)
+    await user.tab()
+    expect(document.activeElement).toBe(within(nav).getByRole('link', { name: 'Cipher Workspace' }))
   })
 })
 
-describe('planned pages stay honest', () => {
-  it('say that nothing is implemented yet', () => {
-    renderAt('/frequency-analyzer')
+describe('routes', () => {
+  it.each([
+    ['/', 'Every cipher leaves a fingerprint.'],
+    ['/workspace', 'Cipher Workspace'],
+    ['/analysis', 'Analysis Lab'],
+    ['/settings', 'Settings'],
+  ])('%s renders its page', (path, heading) => {
+    mockBackend()
+    renderApp(path)
+    expect(screen.getByRole('heading', { level: 1, name: heading })).toBeTruthy()
+  })
 
-    expect(screen.getByRole('note').textContent).toContain('not implemented yet')
+  it.each([
+    ['/cipher-lab', 'Cipher Workspace'],
+    ['/frequency-analyzer', 'Analysis Lab'],
+  ])('the old address %s redirects to %s', (path, heading) => {
+    mockBackend()
+    renderApp(path)
+    expect(screen.getByRole('heading', { level: 1, name: heading })).toBeTruthy()
+  })
+
+  it.each(['/labs/logic', '/theory', '/secure-message-journey', '/nope'])(
+    'the retired or unknown address %s shows a not-found page with a way back',
+    (path) => {
+      mockBackend()
+      renderApp(path)
+      expect(screen.getByRole('heading', { level: 1, name: 'Page not found' })).toBeTruthy()
+      expect(screen.getByRole('link', { name: 'Open Cipher Workspace' }).getAttribute('href')).toBe('/workspace')
+    },
+  )
+
+  it('sets the document title for each page', async () => {
+    mockBackend()
+    const { user } = renderApp('/')
+    expect(document.title).toBe('DISCRETA')
+    await user.click(screen.getByRole('link', { name: 'Cipher Workspace' }))
+    expect(document.title).toBe('Cipher Workspace · DISCRETA')
   })
 })
 
-describe('theory page', () => {
-  it('states and proves three theorems and shows the Euclid computation', () => {
-    renderAt('/theory')
+describe('overview', () => {
+  it('states the purpose and offers both entry points', () => {
+    mockBackend()
+    renderApp('/')
 
-    expect(screen.getAllByText(/^Theorem \d\./)).toHaveLength(3)
-    const rows = screen.getByTestId('euclid-rows').textContent ?? ''
-    expect(rows).toContain('26 = 3 · 7 + 5')
-    expect(rows).toContain('2 = 2 · 1 + 0')
-    const result = screen.getByTestId('euclid-result').textContent ?? ''
-    expect(result).toContain('gcd(26, 7) = 1')
-    expect(result).toContain('15')
-    expect(result).toContain('7 · 15 = 105 = 4 · 26 + 1')
+    expect(screen.getByRole('link', { name: /Open Cipher Workspace/ }).getAttribute('href')).toBe('/workspace')
+    expect(screen.getByRole('link', { name: 'Open Analysis Lab' }).getAttribute('href')).toBe('/analysis')
+    expect(screen.getAllByText(/classical cipher/i).length).toBeGreaterThan(0)
   })
 
-  it('draws both multiplication diagrams with accurate summaries', () => {
-    renderAt('/theory')
+  it('lists the supported methods and says the ciphers are not secure', () => {
+    mockBackend()
+    renderApp('/')
 
-    expect(screen.getByRole('img', { name: /Multiplying by 4: 13 results are each reached by two or more letters and 13 results are never reached/ })).toBeTruthy()
-    expect(screen.getByRole('img', { name: /Multiplying by 5: each of the 26 results is reached by exactly one letter/ })).toBeTruthy()
+    for (const name of ['Caesar cipher', 'Affine cipher', 'Frequency analysis', 'Chi-squared key search']) {
+      expect(screen.getByRole('heading', { name })).toBeTruthy()
+    }
+    expect(screen.getByText(/do not protect real data/)).toBeTruthy()
   })
-})
 
-describe('focal 3D forms', () => {
-  it('use the SVG fallback when WebGL is unavailable', () => {
-    renderAt('/labs/logic')
+  it('shows the Caesar alphabet for k = 3 computed from the formula', () => {
+    mockBackend()
+    renderApp('/')
 
-    expect(screen.getByRole('img', { name: /Decorative illustration: an AND gate/ })).toBeTruthy()
+    const figure = screen.getByRole('img', { name: /shifted by 3/ })
+    expect(figure.getAttribute('aria-label')).toContain('E becomes H')
+  })
+
+  it('has no fake statistics or activity', () => {
+    mockBackend()
+    renderApp('/')
+
+    expect(screen.queryByText(/recent|users|messages encrypted|operations today/i)).toBeNull()
   })
 })

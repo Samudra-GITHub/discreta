@@ -3,13 +3,13 @@
  *
  * The backend is the only place that encrypts or decrypts. Everything here is either
  * input validation that mirrors the API's rules (key format and range), or a *presentation*
- * aid computed with exact integer arithmetic: the alphabet dial preview, the explanation of
- * invalid multipliers, and the worked example. The worked example is built from the actual
+ * aid computed with exact integer arithmetic: the explanation of invalid multipliers and the
+ * worked example. The worked example is built from the actual
  * API response and is cross-checked letter by letter against the backend's output; if any
  * letter disagrees it is withheld rather than shown.
  */
 
-import type { CipherOperation, CipherResponse } from '../../types/cipher'
+import type { CipherResponse } from '../../types/cipher'
 
 export const MODULUS = 26
 
@@ -122,41 +122,6 @@ export function collisionFor(a: bigint, b: bigint): Collision | null {
 }
 
 // ---------------------------------------------------------------------------------------
-// Alphabet dial preview
-// ---------------------------------------------------------------------------------------
-
-export type CipherParams =
-  | { cipher: 'caesar'; k: bigint }
-  | { cipher: 'affine'; a: bigint; b: bigint }
-
-/** The encryption map x -> E(x) on 0..25, or null when the key is not valid. */
-export function encryptionMap(params: CipherParams): number[] | null {
-  if (params.cipher === 'caesar') {
-    const k = mod26(params.k)
-    return Array.from({ length: MODULUS }, (_, x) => (x + k) % MODULUS)
-  }
-  if (!checkMultiplier(params.a).valid) return null
-  const a = mod26(params.a)
-  const b = mod26(params.b)
-  return Array.from({ length: MODULUS }, (_, x) => (a * x + b) % MODULUS)
-}
-
-/**
- * The map the chosen operation applies to each input letter. Decryption is the inverse
- * permutation of encryption, found by swapping inputs and outputs, so no inverse formula
- * is needed here.
- */
-export function operationMap(params: CipherParams, operation: CipherOperation): number[] | null {
-  const encrypt = encryptionMap(params)
-  if (!encrypt || operation === 'encrypt') return encrypt
-  const decrypt = new Array<number>(MODULUS).fill(0)
-  encrypt.forEach((y, x) => {
-    decrypt[y] = x
-  })
-  return decrypt
-}
-
-// ---------------------------------------------------------------------------------------
 // Worked example, built from a real response and checked against it
 // ---------------------------------------------------------------------------------------
 
@@ -237,55 +202,4 @@ export function buildWorkedExample(response: CipherResponse, maxSteps = 5): Work
   }
 
   return lettersTotal === 0 ? { status: 'no-letters' } : { status: 'ok', steps, lettersTotal }
-}
-
-// ---------------------------------------------------------------------------------------
-// Teaching helpers for the Theory & Proofs page (small positive integers only)
-// ---------------------------------------------------------------------------------------
-
-export interface EuclidRow {
-  dividend: number
-  divisor: number
-  quotient: number
-  remainder: number
-}
-
-/** The division steps of the Euclidean algorithm: dividend = quotient · divisor + remainder. */
-export function euclidRows(a: number, b: number): EuclidRow[] {
-  if (!Number.isSafeInteger(a) || !Number.isSafeInteger(b) || a < 0 || b < 0) return []
-  const rows: EuclidRow[] = []
-  let x = a
-  let y = b
-  while (y !== 0) {
-    const quotient = Math.floor(x / y)
-    const remainder = x - quotient * y
-    rows.push({ dividend: x, divisor: y, quotient, remainder })
-    x = y
-    y = remainder
-  }
-  return rows
-}
-
-/** Bézout coefficients by the extended Euclidean algorithm: a·x + b·y = g = gcd(a, b). */
-export function bezout(a: number, b: number): { g: number; x: number; y: number } {
-  let [oldR, r] = [a, b]
-  let [oldX, x] = [1, 0]
-  let [oldY, y] = [0, 1]
-  while (r !== 0) {
-    const q = Math.floor(oldR / r)
-    ;[oldR, r] = [r, oldR - q * r]
-    ;[oldX, x] = [x, oldX - q * x]
-    ;[oldY, y] = [y, oldY - q * y]
-  }
-  return { g: oldR, x: oldX, y: oldY }
-}
-
-/** x -> a·x mod 26 for every letter number, with how many letters land on each result. */
-export function multiplicationTable(a: number): { images: number[]; hits: number[] } {
-  const images = Array.from({ length: MODULUS }, (_, x) => (a * x) % MODULUS)
-  const hits = new Array<number>(MODULUS).fill(0)
-  images.forEach((y) => {
-    hits[y] = (hits[y] ?? 0) + 1
-  })
-  return { images, hits }
 }

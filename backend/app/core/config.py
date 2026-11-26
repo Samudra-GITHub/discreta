@@ -31,7 +31,7 @@ class Settings:
 
     app_name: str = "DISCRETA"
     service_name: str = "discreta-backend"
-    description: str = "Interactive Discrete Mathematics & Cryptography Laboratory"
+    description: str = "Classical cryptography and frequency analysis laboratory"
     api_prefix: str = "/api/v1"
     cors_origins: tuple[str, ...] = field(default_factory=lambda: DEFAULT_CORS_ORIGINS)
     #: Largest accepted request body. A maximal valid cipher request is 10,000 characters

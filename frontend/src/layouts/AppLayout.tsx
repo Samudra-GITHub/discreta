@@ -1,57 +1,51 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
+import { Atmosphere } from '../components/atmosphere/Atmosphere'
 import { BackendHealthProvider } from '../components/BackendHealthProvider'
-import { Header } from '../components/Header'
-import { Sidebar } from '../components/Sidebar'
+import { Taskbar } from '../components/Taskbar'
+import { SessionProvider } from '../session/SessionProvider'
+import { titleForPath } from './navigation'
 
+/**
+ * The application shell: page content and the floating taskbar. There is no sidebar and no
+ * top bar. The session provider sits here, above the routes, so the workspace and the
+ * analysis lab keep their state while the user moves between them.
+ */
 export function AppLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
   const { pathname } = useLocation()
 
-  // Close the mobile drawer on navigation, and scroll back to the top.
+  // Each page sets the document title and starts at the top.
   useEffect(() => {
-    setSidebarOpen(false)
+    document.title = titleForPath(pathname)
     window.scrollTo(0, 0)
   }, [pathname])
 
-  // Escape closes the mobile drawer.
-  useEffect(() => {
-    if (!sidebarOpen) return
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setSidebarOpen(false)
-    }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [sidebarOpen])
-
   return (
     <BackendHealthProvider>
-      <a
-        href="#main"
-        className="aurora-primary sr-only z-50 rounded-full px-4 py-2 text-sm font-bold focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
-      >
-        Skip to content
-      </a>
+      <SessionProvider>
+        <a
+          href="#main"
+          className="btn btn-primary sr-only z-50 focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+        >
+          Skip to content
+        </a>
 
-      <Sidebar open={sidebarOpen} onNavigate={() => setSidebarOpen(false)} />
+        <Atmosphere />
 
-      {sidebarOpen && (
-        <div
-          aria-hidden="true"
-          onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-30 bg-fg/30 backdrop-blur-[2px] lg:hidden"
-        />
-      )}
-
-      <div className="lg:pl-[6.25rem]">
-        <Header sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((o) => !o)} />
-        <main id="main" tabIndex={-1} className="mx-auto max-w-[76rem] px-4 pt-3 pb-16 sm:px-8">
+        {/* Bottom padding keeps the last line of every page clear of the fixed taskbar. */}
+        <main
+          id="main"
+          tabIndex={-1}
+          className="relative z-10 mx-auto w-full max-w-[72rem] px-4 pt-6 pb-[calc(7.5rem+env(safe-area-inset-bottom))] outline-none sm:px-8 sm:pt-10"
+        >
           {/* Keyed by route so each page eases in when you navigate. */}
           <div key={pathname} className="page-enter">
             <Outlet />
           </div>
         </main>
-      </div>
+
+        <Taskbar />
+      </SessionProvider>
     </BackendHealthProvider>
   )
 }
