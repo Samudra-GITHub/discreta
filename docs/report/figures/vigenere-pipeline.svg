@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 380" width="940" height="380" role="img" aria-labelledby="t d">
+  <title id="t">The Vigenère investigation pipeline</title>
+  <desc id="d">Ciphertext letters feed the index of coincidence, Kasiski examination and a mean-column-IC table of key lengths 1 to 20. A key length is suggested or chosen; each column is then analysed with chi-squared to give key letters and ranked candidate keys, which can be sent to the Cipher Workspace. Sections are labelled measured, calculated or suggestion.</desc>
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#242620"/></marker></defs>
+  <rect width="940" height="380" fill="#ffffff"/>
+  <rect x="20" y="60" width="170" height="130" rx="6" fill="#f7f6f0" stroke="#8f8d80" stroke-width="1.2"/>
+  <text x="32" y="82" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#242620">1 Letters</text>
+  <text x="32" y="102" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">ASCII letters only,</text>
+  <text x="32" y="119" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">case ignored</text>
+  <text x="32" y="136" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">positions from 0</text>
+  <text x="32" y="176" text-anchor="start" font-family="'IBM Plex Mono', Consolas, 'Courier New', monospace" font-size="10.5" font-weight="700" fill="#626359">MEASURED</text>
+  <rect x="200" y="60" width="170" height="130" rx="6" fill="#f7f6f0" stroke="#8f8d80" stroke-width="1.2"/>
+  <text x="212" y="82" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#242620">2 IC and Kasiski</text>
+  <text x="212" y="102" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">IC = Σ f(f−1)/(N(N−1))</text>
+  <text x="212" y="119" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">repeats ≥ 3 letters,</text>
+  <text x="212" y="136" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">distances, votes</text>
+  <text x="212" y="176" text-anchor="start" font-family="'IBM Plex Mono', Consolas, 'Courier New', monospace" font-size="10.5" font-weight="700" fill="#626359">MEASURED</text>
+  <rect x="380" y="60" width="170" height="130" rx="6" fill="#f7f6f0" stroke="#8f8d80" stroke-width="1.2"/>
+  <text x="392" y="82" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#242620">3 Key lengths</text>
+  <text x="392" y="102" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">mean column IC for</text>
+  <text x="392" y="119" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">m = 1 … 20</text>
+  <text x="392" y="136" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">plausible = ≥ 0.055 and</text>
+  <text x="392" y="153" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">within 0.005 of best</text>
+  <text x="392" y="176" text-anchor="start" font-family="'IBM Plex Mono', Consolas, 'Courier New', monospace" font-size="10.5" font-weight="700" fill="#626359">CALCULATED</text>
+  <rect x="560" y="60" width="170" height="130" rx="6" fill="#f7f6f0" stroke="#8f8d80" stroke-width="1.2"/>
+  <text x="572" y="82" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#242620">4 Key letters</text>
+  <text x="572" y="102" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">column j = Caesar</text>
+  <text x="572" y="119" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">χ² per shift 0 … 25</text>
+  <text x="572" y="136" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">best shift = key letter</text>
+  <text x="572" y="176" text-anchor="start" font-family="'IBM Plex Mono', Consolas, 'Courier New', monospace" font-size="10.5" font-weight="700" fill="#626359">CALCULATED</text>
+  <rect x="740" y="60" width="170" height="130" rx="6" fill="#f7f6f0" stroke="#bc4a27" stroke-width="1.6"/>
+  <text x="752" y="82" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#242620">5 Candidate keys</text>
+  <text x="752" y="102" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">best-first sums of</text>
+  <text x="752" y="119" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">column χ², ≤ 10 keys</text>
+  <text x="752" y="136" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">decrypt, whole-text χ²</text>
+  <text x="752" y="176" text-anchor="start" font-family="'IBM Plex Mono', Consolas, 'Courier New', monospace" font-size="10.5" font-weight="700" fill="#bc4a27">SUGGESTION</text>
+  <line x1="190" y1="125" x2="200" y2="125" stroke="#242620" stroke-width="1.4" marker-end="url(#a)"/>
+  <line x1="370" y1="125" x2="380" y2="125" stroke="#242620" stroke-width="1.4" marker-end="url(#a)"/>
+  <line x1="550" y1="125" x2="560" y2="125" stroke="#242620" stroke-width="1.4" marker-end="url(#a)"/>
+  <line x1="730" y1="125" x2="740" y2="125" stroke="#242620" stroke-width="1.4" marker-end="url(#a)"/>
+  <rect x="20" y="230" width="420" height="100" rx="6" fill="#f7f6f0" stroke="#8f8d80" stroke-width="1.2"/>
+  <text x="32" y="252" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#242620">Honest by construction</text>
+  <text x="32" y="272" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">every result carries a reliability flag by text length;</text>
+  <text x="32" y="289" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">multiples of the true key length also look plausible,</text>
+  <text x="32" y="306" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">so the shortest plausible length is suggested first.</text>
+  <rect x="470" y="230" width="450" height="100" rx="6" fill="#ebe9df" stroke="#8f8d80" stroke-width="1.2"/>
+  <text x="482" y="252" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#242620">Then</text>
+  <text x="482" y="272" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">Inspect any candidate · Copy its text · Send to Cipher Workspace</text>
+  <text x="482" y="289" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">(set to encrypt the plaintext with the key: it should</text>
+  <text x="482" y="306" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">reproduce the ciphertext).</text>
+  <text x="470" y="360" text-anchor="middle" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#626359">Measured = counted from the text · Calculated = derived by a formula · Suggestion = an estimate, not proof.</text>
+</svg>

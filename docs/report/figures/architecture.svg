@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 470" width="940" height="470" role="img" aria-labelledby="t d">
+  <title id="t">DISCRETA system architecture</title>
+  <desc id="d">The React frontend (pages, shared session, services) sends JSON over HTTP to the FastAPI backend (middleware, routers, the algebra and analysis packages). The analysis package calls the algebra package. The browser performs no cryptography.</desc>
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#242620"/></marker></defs>
+  <rect width="940" height="470" fill="#ffffff"/>
+  <rect x="20" y="20" width="400" height="430" rx="10" fill="none" stroke="#8f8d80" stroke-width="1" stroke-dasharray="6 5"/>
+  <text x="34" y="40" text-anchor="start" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#242620">Browser: React 19 + TypeScript + Vite + Tailwind</text>
+  <rect x="40" y="52" width="360" height="78" rx="6" fill="#f7f6f0" stroke="#8f8d80" stroke-width="1.2"/>
+  <text x="52" y="74" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#242620">Pages</text>
+  <text x="52" y="94" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">Overview · Cipher Workspace · Analysis Lab · Settings</text>
+  <text x="52" y="111" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">floating glass taskbar (the only navigation)</text>
+  <rect x="40" y="152" width="360" height="100" rx="6" fill="#f7f6f0" stroke="#8f8d80" stroke-width="1.2"/>
+  <text x="52" y="174" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#242620">Shared session (in memory)</text>
+  <text x="52" y="194" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">workspace state: cipher, keys, keyword, result</text>
+  <text x="52" y="211" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">analysis state: text, tab, five results</text>
+  <text x="52" y="228" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">transfers in both directions</text>
+  <rect x="40" y="274" width="360" height="78" rx="6" fill="#f7f6f0" stroke="#8f8d80" stroke-width="1.2"/>
+  <text x="52" y="296" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#242620">Services</text>
+  <text x="52" y="316" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">api.ts: request, timeout, abort, error parsing</text>
+  <text x="52" y="333" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">cipher.ts · analysis.ts: reply shape guards</text>
+  <rect x="40" y="374" width="360" height="56" rx="6" fill="#ebe9df" stroke="#8f8d80" stroke-width="1.2"/>
+  <text x="52" y="396" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#242620">Theme and background</text>
+  <text x="52" y="416" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">system / light / dark · decorative layer</text>
+  <rect x="520" y="20" width="400" height="430" rx="10" fill="none" stroke="#8f8d80" stroke-width="1" stroke-dasharray="6 5"/>
+  <text x="534" y="40" text-anchor="start" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#242620">Backend: Python 3.12 + FastAPI</text>
+  <rect x="540" y="52" width="360" height="64" rx="6" fill="#f7f6f0" stroke="#8f8d80" stroke-width="1.2"/>
+  <text x="552" y="74" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#242620">Middleware</text>
+  <text x="552" y="94" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">CORS (explicit origins) · request body limit 256 KiB</text>
+  <rect x="540" y="134" width="360" height="64" rx="6" fill="#f7f6f0" stroke="#8f8d80" stroke-width="1.2"/>
+  <text x="552" y="156" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#242620">Routers and schemas</text>
+  <text x="552" y="176" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">/api/v1/algebra · /api/v1/analysis</text>
+  <text x="552" y="193" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">Pydantic validation · uniform error body</text>
+  <rect x="540" y="216" width="360" height="96" rx="6" fill="#f7f6f0" stroke="#bc4a27" stroke-width="1.6"/>
+  <text x="552" y="238" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#242620">analysis</text>
+  <text x="552" y="258" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">frequency · χ² · Caesar and affine ranking</text>
+  <text x="552" y="275" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">index of coincidence · Kasiski</text>
+  <text x="552" y="292" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">Vigenère key length and key letters</text>
+  <rect x="540" y="330" width="360" height="100" rx="6" fill="#f7f6f0" stroke="#bc4a27" stroke-width="1.6"/>
+  <text x="552" y="352" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="700" fill="#242620">algebra</text>
+  <text x="552" y="372" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">gcd · extended Euclid · modular inverse</text>
+  <text x="552" y="389" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">Caesar · affine · Vigenère ciphers</text>
+  <text x="552" y="406" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#626359">key validation (no FastAPI imports)</text>
+  <path d="M400 300 H448 V150 H538" fill="none" stroke="#242620" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="470" y="142" text-anchor="middle" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#626359">POST JSON</text>
+  <path d="M538 180 H494 V330 H402" fill="none" stroke="#242620" stroke-width="1.4" stroke-dasharray="5 4" marker-end="url(#a)"/>
+  <text x="470" y="346" text-anchor="middle" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#626359">JSON or error</text>
+  <line x1="720" y1="312" x2="720" y2="330" stroke="#242620" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="727" y="326" text-anchor="start" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="400" fill="#626359">decrypt, inverses</text>
+  <text x="470" y="462" text-anchor="middle" font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#626359">The browser validates input and presents results; every cipher operation and statistic is computed by the backend.</text>
+</svg>

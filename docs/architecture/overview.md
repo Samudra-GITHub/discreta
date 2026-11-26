@@ -10,6 +10,9 @@ History: v0.1.0 foundation, v0.2.0 and v0.2.1 cipher engine, v0.3.0 first Cipher
 product refocus, v1.0.0 Vigenère cipher, index of coincidence, Kasiski examination and key recovery. Earlier plans for separate Logic, Sets, Combinatorics and Graphs
 laboratories were dropped: they were outside the project topic, and their empty stubs were removed.
 
+How data moves through the system, with diagrams, is in [data-flow.md](data-flow.md); the user-facing description is in the
+[user guide](../user-guide.md).
+
 ## Monorepo
 
 `frontend/` and `backend/` live in one repository. The two halves change together (an API change usually

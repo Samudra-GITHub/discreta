@@ -1,6 +1,6 @@
 # DISCRETA release report: v1.0.0
 
-Team BugSquad. Final academic release. Everything below was built and verified in this repository; the figures
+Team BugSquad (Samudra Kar and Shriyanshu Rout Roy). Final academic release. Everything below was built and verified in this repository; the figures
 come from runs of the real test suites and the real application against the real backend.
 
 ## What DISCRETA is
