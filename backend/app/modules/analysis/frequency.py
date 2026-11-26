@@ -18,6 +18,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from app.modules.analysis.coincidence import index_of_coincidence
 from app.modules.analysis.english import ENGLISH_PERCENT_NORMALISED, ENGLISH_PROPORTIONS, LETTERS
 from app.modules.analysis.scoring import chi_contributions, chi_squared, expected_counts
 
@@ -88,6 +89,7 @@ class FrequencyAnalysis:
     least_frequent: tuple[str, ...]  # up to 3 occurring letters with the smallest counts
     absent: tuple[str, ...]  # letters that never occur
     chi_squared: float | None  # versus English; None when there are no letters
+    index_of_coincidence: float | None  # None below two letters
 
 
 def rank_order(counts: list[int]) -> list[int]:
@@ -134,4 +136,5 @@ def analyse(text: str) -> FrequencyAnalysis:
         least_frequent=tuple(LETTERS[i] for i in rarest_first[:3]),
         absent=tuple(LETTERS[i] for i in range(26) if counts[i] == 0),
         chi_squared=chi_squared(counts, ENGLISH_PROPORTIONS) if total else None,
+        index_of_coincidence=index_of_coincidence(counts),
     )

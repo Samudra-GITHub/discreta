@@ -1,12 +1,13 @@
 # Architecture overview
 
-DISCRETA is a classical cryptography and frequency analysis laboratory: encrypt and decrypt with Caesar
-and affine ciphers, analyse ciphertext statistically, and rank candidate keys. The mathematics (modular
+DISCRETA is a classical cryptography and frequency analysis laboratory: encrypt and decrypt with the Caesar,
+affine and Vigenère ciphers, analyse ciphertext statistically, rank candidate keys and investigate the key
+length of a repeating-key cipher. The mathematics (modular
 arithmetic, gcd, the extended Euclidean algorithm, modular inverses, frequency distributions, the
 chi-squared statistic) runs behind the interface and is documented in `docs/mathematics/`.
 
 History: v0.1.0 foundation, v0.2.0 and v0.2.1 cipher engine, v0.3.0 first Cipher Laboratory, v0.4.0
-product refocus (this document). Earlier plans for separate Logic, Sets, Combinatorics and Graphs
+product refocus, v1.0.0 Vigenère cipher, index of coincidence, Kasiski examination and key recovery. Earlier plans for separate Logic, Sets, Combinatorics and Graphs
 laboratories were dropped: they were outside the project topic, and their empty stubs were removed.
 
 ## Monorepo
@@ -23,8 +24,8 @@ each one under `/api/v1/<slug>`.
 
 | Module | Files | Responsibility |
 | --- | --- | --- |
-| `algebra` | `number_theory.py`, `ciphers.py`, `schemas.py`, `router.py` | Euclid, extended Euclid, modular inverse; Caesar and affine encryption and decryption; key validation |
-| `analysis` | `english.py`, `scoring.py`, `frequency.py`, `cryptanalysis.py`, `schemas.py`, `router.py` | English reference, χ², letter frequencies, Caesar and affine key ranking, reliability |
+| `algebra` | `number_theory.py`, `ciphers.py`, `schemas.py`, `router.py` | Euclid, extended Euclid, modular inverse; Caesar, affine and Vigenère encryption and decryption; key validation |
+| `analysis` | `english.py`, `scoring.py`, `frequency.py`, `cryptanalysis.py`, `coincidence.py`, `kasiski.py`, `vigenere_analysis.py`, `schemas.py`, `router.py` | English reference, χ², letter frequencies, Caesar and affine key ranking, index of coincidence, Kasiski examination, Vigenère key-length ranking and key estimation, reliability |
 
 The mathematics (`number_theory`, `ciphers`, `scoring`, `frequency`, `cryptanalysis`) never imports
 FastAPI, so it can be tested and reused directly. The routers only translate requests into calls on those
@@ -32,8 +33,9 @@ functions and turn expected failures into the uniform error response. `analysis`
 decryption and inverses and has no cipher arithmetic of its own.
 
 Endpoints: `GET /`, `GET /api/v1/health`, `GET /api/v1/modules`,
-`POST /api/v1/algebra/{caesar,affine}/{encrypt,decrypt}` and
-`POST /api/v1/analysis/{frequency, caesar/crack, affine/search}`.
+`POST /api/v1/algebra/{caesar,affine,vigenere}/{encrypt,decrypt}` and
+`POST /api/v1/analysis/{frequency, caesar/crack, affine/search, vigenere/lengths, vigenere/candidates}`.
+The full reference is in [../api.md](../api.md).
 
 ### Cross-cutting backend rules
 
@@ -63,7 +65,7 @@ No other runtime dependencies.
 | `components/Taskbar.tsx` | The only navigation |
 | `components/ui.tsx`, `TextEditor.tsx` | Shared primitives: sections, segmented control, notices, copy, editor |
 | `components/workspace/` | Key controls, the formula, the worked steps |
-| `components/analysis/` | Charts, the three tabs, the candidate table and inspector |
+| `components/analysis/` | Charts, the four tabs (Frequency, Caesar, Affine, Vigenère), the candidate table and inspector |
 | `pages/` | Overview, Workspace, Analysis Lab, Settings, Not found |
 | `session/` | Shared state: workspace, analysis and the transfers between them |
 | `theme/` | Light, dark, system |
@@ -83,14 +85,17 @@ results (`interpret.ts`) describes numbers the backend returned.
 ### Session and the connected workflow
 
 `SessionProvider` (inside the router, above the routes) holds one in-memory session: the workspace state
-(`useCipherLab`) and the analysis state (`useAnalysisSession`: the ciphertext, the active tab, and one
-result per analysis). It survives navigation and ends when the tab closes; nothing is persisted.
+(`useCipherLab`) and the analysis state (`useAnalysisSession`: the ciphertext, the active tab, one
+result per analysis, and for Vigenère the key-length investigation plus the chosen length). It survives navigation and ends when the tab closes; nothing is persisted.
 
 * **Workspace → Analysis Lab:** "Send to Analysis Lab" (or "Analyse" on the input) sets the analysis text,
   opens the lab and runs the frequency analysis.
 * **Analysis Lab → Workspace:** "Send to Cipher Workspace" on a candidate fills the workspace with the
-  candidate's plaintext, the candidate's cipher and key, and the *encrypt* operation, so running it
-  reproduces the ciphertext.
+  candidate's plaintext, the candidate's cipher and key (for Vigenère, the shortest equivalent keyword), and
+  the *encrypt* operation, so running it reproduces the ciphertext.
+* **Vigenère investigation:** one run asks the backend for the IC, the Kasiski evidence and the ranked key
+  lengths, then (if a length is suggested) for the key letters of that length; any other length can be chosen
+  from the table.
 * **Clear:** Clear in the lab empties the text and all results; "Clear session" in Settings resets both
   halves.
 * Results are only used while they match the current inputs; otherwise they stay visible, marked as out of
@@ -106,10 +111,11 @@ without horizontal scrolling at 375, 768, 1024 and 1440 px.
 
 ## Known limitations
 
-* Only Caesar and affine exist. Vigenère, Kasiski examination and the index of coincidence are not
-  implemented; the analysis package is organised so they can be added beside `cryptanalysis.py`.
+* Only the Caesar, affine and Vigenère ciphers exist; no other classical cipher (Playfair, Hill, transposition)
+  is implemented. Vigenère recovery is a statistical estimate and needs enough text per key letter.
 * The English reference is a single average table; a text in another language, or an unusual English text
-  such as a pangram, can be ranked wrongly. Short texts are flagged but still ranked.
+  such as a pangram, can be ranked wrongly. Short texts are flagged but still ranked. The index of coincidence,
+  Kasiski examination and the Friedman estimate are evidence, not proof.
 * An integer literal of more than 4,300 digits in a request body is refused by Python's JSON parser with
   HTTP 400 (`bad_request`) rather than 422. POSTs to a URL with a trailing slash get a 307 redirect.
 * Python and Node environments are not portable between folders; see the README if the repository moves.

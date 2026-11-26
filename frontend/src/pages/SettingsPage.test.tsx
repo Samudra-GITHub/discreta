@@ -120,7 +120,7 @@ describe('backend panel', () => {
     renderApp('/settings')
 
     expect(await screen.findByText('Connected')).toBeTruthy()
-    expect(screen.getByText(/discreta-backend v0.4.0/)).toBeTruthy()
+    expect(screen.getByText(/discreta-backend v1.0.0/)).toBeTruthy()
   })
 
   it('says so when the backend is offline and lets you check again', async () => {
@@ -139,6 +139,6 @@ describe('backend panel', () => {
     renderApp('/settings')
 
     expect(screen.getByText(/not secure encryption/)).toBeTruthy()
-    expect(screen.getByText('Version 0.4.0')).toBeTruthy()
+    expect(screen.getByText('Version 1.0.0')).toBeTruthy()
   })
 })

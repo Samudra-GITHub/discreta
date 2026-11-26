@@ -16,6 +16,10 @@ MAX_TEXT_LENGTH = 10_000
 #: reduced mod 26.
 MAX_KEY_MAGNITUDE = 9_007_199_254_740_991
 
+#: Longest Vigenere keyword the API accepts. Like the other limits this is a transport limit; the
+#: functions in ``ciphers.py`` accept a keyword of any length.
+MAX_KEYWORD_LENGTH = 64
+
 Operation = Literal["encrypt", "decrypt"]
 
 _TEXT = Field(
@@ -84,3 +88,29 @@ class AffineResponse(BaseModel):
     effective_a: int = Field(description="a mod 26 (0..25).")
     effective_b: int = Field(description="b mod 26 (0..25).")
     a_inverse: int = Field(description="Multiplicative inverse of a modulo 26.")
+
+
+class VigenereRequest(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+        json_schema_extra={"examples": [{"text": "ATTACK AT DAWN", "key": "LEMON"}]},
+    )
+
+    text: str = _TEXT
+    key: str = Field(
+        max_length=MAX_KEYWORD_LENGTH,
+        description=(
+            "Keyword of 1 to 64 ASCII letters (A-Z, a-z; case is ignored). Its letters, as "
+            "shifts 0..25, repeat over the letters of the text."
+        ),
+    )
+
+
+class VigenereResponse(BaseModel):
+    cipher: Literal["vigenere"] = "vigenere"
+    operation: Operation
+    input: str
+    output: str
+    key: str = Field(description="The keyword as submitted.")
+    key_shifts: list[int] = Field(description="The keyword's letters as shifts 0..25 (A = 0).")
+    key_length: int = Field(description="Number of letters in the keyword.")

@@ -1,14 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { runAffine, runCaesar } from '../../services/cipher'
+import { runAffine, runCaesar, runVigenere } from '../../services/cipher'
 import type { CipherId, CipherOperation, CipherResponse } from '../../types/cipher'
 import {
   checkMultiplier,
   describeKeyProblem,
+  describeKeywordProblem,
   MAX_KEY,
   MAX_TEXT_LENGTH,
   parseKey,
+  parseKeyword,
   textLength,
   type KeyParse,
+  type KeywordParse,
   type MultiplierCheck,
 } from './cipherMath'
 import { describeLabError, type LabError, type LabField } from './labErrors'
@@ -21,6 +24,7 @@ export interface LabInputs {
   key: string
   a: string
   b: string
+  keyword: string
 }
 
 export type LabRun =
@@ -29,7 +33,7 @@ export type LabRun =
   | { status: 'success'; result: CipherResponse; ranWith: LabInputs }
   | { status: 'error'; error: LabError; ranWith: LabInputs }
 
-const INITIAL: LabInputs = { cipher: 'caesar', operation: 'encrypt', text: '', key: '3', a: '5', b: '8' }
+const INITIAL: LabInputs = { cipher: 'caesar', operation: 'encrypt', text: '', key: '3', a: '5', b: '8', keyword: 'LEMON' }
 
 export interface CipherLab {
   inputs: LabInputs
@@ -41,6 +45,7 @@ export interface CipherLab {
     key: KeyParse
     a: KeyParse
     b: KeyParse
+    keyword: KeywordParse
     multiplier: MultiplierCheck | null
     /** Message to show next to each field, if any. Backend messages are merged in after a run. */
     messages: Partial<Record<LabField, string>>
@@ -51,7 +56,7 @@ export interface CipherLab {
   setCipher: (cipher: CipherId) => void
   setOperation: (operation: CipherOperation) => void
   setText: (text: string) => void
-  setField: (field: 'key' | 'a' | 'b', value: string) => void
+  setField: (field: 'key' | 'a' | 'b' | 'keyword', value: string) => void
   /** Nudge a key by `delta` (for the ± buttons), staying inside the API's range. */
   nudge: (field: 'key' | 'a' | 'b', delta: number) => void
   clear: () => void
@@ -69,7 +74,11 @@ const sameInputs = (x: LabInputs, y: LabInputs) =>
   x.cipher === y.cipher &&
   x.operation === y.operation &&
   x.text === y.text &&
-  (x.cipher === 'caesar' ? x.key === y.key : x.a === y.a && x.b === y.b)
+  (x.cipher === 'caesar'
+    ? x.key === y.key
+    : x.cipher === 'vigenere'
+      ? x.keyword === y.keyword
+      : x.a === y.a && x.b === y.b)
 
 export function useCipherLab(initial: Partial<LabInputs> = {}): CipherLab {
   const [inputs, setInputs] = useState<LabInputs>({ ...INITIAL, ...initial })
@@ -83,6 +92,7 @@ export function useCipherLab(initial: Partial<LabInputs> = {}): CipherLab {
     const key = parseKey(inputs.key)
     const a = parseKey(inputs.a)
     const b = parseKey(inputs.b)
+    const keyword = parseKeyword(inputs.keyword)
     const multiplier = a.ok ? checkMultiplier(a.big) : null
 
     const messages: Partial<Record<LabField, string>> = {}
@@ -91,6 +101,8 @@ export function useCipherLab(initial: Partial<LabInputs> = {}): CipherLab {
     }
     if (inputs.cipher === 'caesar') {
       if (!key.ok) messages.key = describeKeyProblem(key.problem, 'The shift k')
+    } else if (inputs.cipher === 'vigenere') {
+      if (!keyword.ok) messages.key = describeKeywordProblem(keyword.problem)
     } else {
       if (!a.ok) messages.a = describeKeyProblem(a.problem, 'The multiplier a')
       else if (multiplier && !multiplier.valid) {
@@ -99,7 +111,7 @@ export function useCipherLab(initial: Partial<LabInputs> = {}): CipherLab {
       if (!b.ok) messages.b = describeKeyProblem(b.problem, 'The offset b')
     }
 
-    return { textLength: length, textTooLong: length > MAX_TEXT_LENGTH, key, a, b, multiplier, messages }
+    return { textLength: length, textTooLong: length > MAX_TEXT_LENGTH, key, a, b, keyword, multiplier, messages }
   }, [inputs])
 
   const canRun =
@@ -108,7 +120,9 @@ export function useCipherLab(initial: Partial<LabInputs> = {}): CipherLab {
     !validation.textTooLong &&
     (inputs.cipher === 'caesar'
       ? validation.key.ok
-      : validation.a.ok && validation.b.ok && validation.multiplier?.valid === true)
+      : inputs.cipher === 'vigenere'
+        ? validation.keyword.ok
+        : validation.a.ok && validation.b.ok && validation.multiplier?.valid === true)
 
   const stale = run.status === 'success' && !sameInputs(run.ranWith, inputs)
 
@@ -144,7 +158,7 @@ export function useCipherLab(initial: Partial<LabInputs> = {}): CipherLab {
     [dismissError],
   )
   const setField = useCallback(
-    (field: 'key' | 'a' | 'b', value: string) => {
+    (field: 'key' | 'a' | 'b' | 'keyword', value: string) => {
       setInputs((current) => ({ ...current, [field]: value }))
       dismissError()
     },
@@ -212,6 +226,13 @@ export function useCipherLab(initial: Partial<LabInputs> = {}): CipherLab {
         result = await runCaesar(
           ranWith.operation,
           { text: ranWith.text, key: validation.key.value },
+          { signal: controller.signal },
+        )
+      } else if (ranWith.cipher === 'vigenere') {
+        if (!validation.keyword.ok) return
+        result = await runVigenere(
+          ranWith.operation,
+          { text: ranWith.text, key: validation.keyword.value },
           { signal: controller.signal },
         )
       } else {

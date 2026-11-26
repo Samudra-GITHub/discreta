@@ -14,9 +14,13 @@ export function Formula({ lab }: { lab: CipherLab }) {
       ? operation === 'encrypt'
         ? 'E(x) = (x + k) mod 26'
         : 'D(y) = (y − k) mod 26'
-      : operation === 'encrypt'
-        ? 'E(x) = (a·x + b) mod 26'
-        : 'D(y) = a⁻¹ · (y − b) mod 26'
+      : cipher === 'vigenere'
+        ? operation === 'encrypt'
+          ? 'Cᵢ = (Pᵢ + Kᵢ) mod 26'
+          : 'Pᵢ = (Cᵢ − Kᵢ + 26) mod 26'
+        : operation === 'encrypt'
+          ? 'E(x) = (a·x + b) mod 26'
+          : 'D(y) = a⁻¹ · (y − b) mod 26'
 
   const fresh = run.status === 'success' && !stale ? run.result : null
   const inverse = fresh && fresh.cipher === 'affine' ? fresh.a_inverse : null
@@ -25,6 +29,9 @@ export function Formula({ lab }: { lab: CipherLab }) {
   if (cipher === 'caesar' && validation.key.ok) {
     const k = mod26(validation.key.big)
     numeric = operation === 'encrypt' ? `E(x) = (x + ${k}) mod 26` : `D(y) = (y − ${k}) mod 26`
+  } else if (cipher === 'vigenere' && validation.keyword.ok) {
+    const { value, shifts } = validation.keyword
+    numeric = `Kᵢ = k[i mod ${shifts.length}],  k = (${shifts.join(', ')})  from ${value.toUpperCase()}`
   } else if (cipher === 'affine' && validation.a.ok && validation.b.ok && validation.multiplier?.valid) {
     const a = validation.multiplier.residue
     const b = mod26(validation.b.big)
@@ -42,7 +49,9 @@ export function Formula({ lab }: { lab: CipherLab }) {
         </p>
       )}
       <p className="caption mt-2 max-w-[40rem]">
-        x and y are letter positions, A = 0 to Z = 25.
+        {cipher === 'vigenere'
+          ? 'Pᵢ, Cᵢ and Kᵢ are the i-th letter of the message, of the ciphertext and of the repeating key, as numbers A = 0 to Z = 25; i counts letters only.'
+          : 'x and y are letter positions, A = 0 to Z = 25.'}
         {cipher === 'affine' && (
           <>
             {' '}

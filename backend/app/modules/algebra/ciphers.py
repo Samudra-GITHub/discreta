@@ -133,3 +133,74 @@ def affine_decrypt(text: str, a: int, b: int) -> str:
     a_res, b_res = validate_affine_key(a, b)
     a_inv = mod_inverse(a_res, MODULUS)
     return _map_letters(text, lambda y: a_inv * (y - b_res))
+
+
+# ---------------------------------------------------------------------------
+# Vigenere cipher
+# ---------------------------------------------------------------------------
+#
+# A Vigenere key is a keyword of letters. Its letters, read as numbers 0..25, are shifts
+# ``K_0 K_1 ... K_{m-1}`` that repeat along the message:
+#
+#     C_i = (P_i + K_(i mod m)) mod 26          P_i = (C_i - K_(i mod m)) mod 26
+#
+# where ``i`` counts only the *letters* of the text (ASCII ``A-Z`` and ``a-z``). Spaces, digits,
+# punctuation and every other character are copied through unchanged and do NOT use up a key
+# letter, so the key stays aligned with the letters however the text is punctuated. Letter case
+# is preserved, and the case of the keyword is irrelevant (``Lemon`` = ``LEMON``).
+
+
+def vigenere_shifts(key: object) -> tuple[int, ...]:
+    """Validate a keyword and return its letters as shifts ``0..25`` (``A`` = 0).
+
+    Raises:
+        InvalidKeyError: if ``key`` is not a string, is empty, or contains anything other than
+            the ASCII letters ``A-Z`` and ``a-z``. The message never repeats the keyword.
+    """
+    if not isinstance(key, str):
+        raise InvalidKeyError("The Vigenere key must be a keyword made of letters.", "key")
+    if key == "":
+        raise InvalidKeyError("The Vigenere key must contain at least one letter.", "key")
+    shifts: list[int] = []
+    for char in key:
+        code = ord(char)
+        if _UPPER_BASE <= code < _UPPER_BASE + MODULUS:
+            shifts.append(code - _UPPER_BASE)
+        elif _LOWER_BASE <= code < _LOWER_BASE + MODULUS:
+            shifts.append(code - _LOWER_BASE)
+        else:
+            raise InvalidKeyError(
+                "The Vigenere key may contain only the letters A-Z and a-z: no spaces, digits, "
+                "punctuation or accented letters.",
+                "key",
+            )
+    return tuple(shifts)
+
+
+def _vigenere(text: str, shifts: tuple[int, ...], direction: int) -> str:
+    """Shift each letter by the next key letter (``direction`` is +1 to encrypt, -1 to decrypt)."""
+    out: list[str] = []
+    index = 0  # position among the letters only
+    length = len(shifts)
+    for char in text:
+        code = ord(char)
+        if _UPPER_BASE <= code < _UPPER_BASE + MODULUS:
+            base = _UPPER_BASE
+        elif _LOWER_BASE <= code < _LOWER_BASE + MODULUS:
+            base = _LOWER_BASE
+        else:
+            out.append(char)
+            continue
+        out.append(chr(base + (code - base + direction * shifts[index % length]) % MODULUS))
+        index += 1
+    return "".join(out)
+
+
+def vigenere_encrypt(text: str, key: str) -> str:
+    """Encrypt with ``C_i = (P_i + K_i) mod 26``, the keyword repeating over the letters."""
+    return _vigenere(text, vigenere_shifts(key), 1)
+
+
+def vigenere_decrypt(text: str, key: str) -> str:
+    """Decrypt with ``P_i = (C_i - K_i + 26) mod 26``, the keyword repeating over the letters."""
+    return _vigenere(text, vigenere_shifts(key), -1)

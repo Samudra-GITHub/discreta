@@ -1,6 +1,6 @@
-/** Types for the Caesar and affine cipher endpoints (`/api/v1/algebra/...`). */
+/** Types for the Caesar, affine and Vigenère cipher endpoints (`/api/v1/algebra/...`). */
 
-export type CipherId = 'caesar' | 'affine'
+export type CipherId = 'caesar' | 'affine' | 'vigenere'
 export type CipherOperation = 'encrypt' | 'decrypt'
 
 export interface CaesarRequest {
@@ -40,4 +40,22 @@ export interface AffineResponse {
   a_inverse: number
 }
 
-export type CipherResponse = CaesarResponse | AffineResponse
+export interface VigenereRequest {
+  text: string
+  /** A keyword of 1 to 64 ASCII letters. */
+  key: string
+}
+
+export interface VigenereResponse {
+  cipher: 'vigenere'
+  operation: CipherOperation
+  input: string
+  output: string
+  /** The keyword as submitted. */
+  key: string
+  /** The keyword's letters as shifts 0..25 (A = 0). */
+  key_shifts: number[]
+  key_length: number
+}
+
+export type CipherResponse = CaesarResponse | AffineResponse | VigenereResponse

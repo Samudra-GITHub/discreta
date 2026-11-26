@@ -62,6 +62,14 @@ Pages ease in over 240 ms (opacity and 6 px). Results ease in over 200 ms. Hover
 last 150 ms. `prefers-reduced-motion` reduces every animation and transition to nothing. Apart from the background layer below there is no
 continuous animation, no parallax and no 3D.
 
+## Evidence labels
+
+In the Vigenère tab each section carries a small label: **Measured** (counted directly from the text: letters, IC,
+repeated sequences and their positions), **Calculated** (derived by a formula: mean IC, χ²) or **Suggestion** (a
+statistical estimate such as the suggested key length or a candidate key). Charts show real values only: the IC
+gauge marks the random value, the English value and the text's own value on one scale, and the length chart
+marks the English and random values as reference lines (dashed and dotted, so the two differ without colour).
+
 ## Atmosphere (background layer)
 
 A supporting layer that gives the app the feel of a cryptographic investigation room without competing with

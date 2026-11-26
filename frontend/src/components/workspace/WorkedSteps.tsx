@@ -32,6 +32,7 @@ export function WorkedSteps({ response }: { response: CipherResponse }) {
         {example.steps.map((s, i) => (
           <li key={i} data-testid="worked-step">
             {s.input} = {s.number} → {s.expression}
+            {s.keyLetter ? ` (key ${s.keyLetter})` : ''}
             {s.raw !== s.result ? ` = ${s.raw} ≡ ${s.result}` : ` = ${s.result}`} → <span className="text-accent-ink">{s.output}</span>
           </li>
         ))}

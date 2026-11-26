@@ -15,15 +15,28 @@ One file per topic, each containing:
    edge cases.
 5. **References**: textbook chapter or paper.
 
-## Written
+## Notes
 
 | Note | Core content |
 | --- | --- |
-| [Caesar and affine ciphers](caesar-and-affine.md) | ℤ₂₆ encoding, modular arithmetic, Caesar and affine derivations, gcd and coprimality, extended Euclid, modular inverses, worked examples, error handling and security notes (v0.2.0, corrected in v0.2.1) |
-| [Frequency analysis and statistical key search](frequency-analysis.md) | Letter counts and character treatment, the English reference, the χ² statistic, why trying every key works, Caesar (26 keys) and affine (312 keys) ranking, reliability and limits (v0.4.0) |
+| [Caesar and affine ciphers](caesar-and-affine.md) | ℤ₂₆ encoding, **modular arithmetic**, Caesar and affine derivations, gcd and coprimality, the extended Euclidean algorithm, **modular inverses**, worked examples, errors and security notes |
+| [The Vigenère cipher](vigenere.md) | repeating-key shifts, the treatment of non-letters, validation, a worked example, verification |
+| [Frequency analysis and statistical key search](frequency-analysis.md) | letter counts and character treatment, the English reference, the **χ² statistic**, Caesar (26 keys) and affine (312 keys) ranking, reliability and limits |
+| [Polyalphabetic analysis](polyalphabetic-analysis.md) | the **index of coincidence**, **Kasiski examination**, key-length ranking, per-column key letters, candidate keys, limits |
 
-## Not yet written
+## Where each topic is explained
 
-| Note | Core content |
+| Topic | Note and section |
 | --- | --- |
-| Vigenère cipher, Kasiski examination, index of coincidence | Repeated Caesar shifts under a keyword of length m; IC = Σ nᵢ(nᵢ − 1) / (N(N − 1)). Not implemented, so not documented. |
+| Caesar cipher | caesar-and-affine, sections 3 and 8 |
+| Affine cipher | caesar-and-affine, sections 4 and 8 |
+| Vigenère cipher | vigenere |
+| Modular arithmetic | caesar-and-affine, section 2 |
+| Modular inverses (gcd, extended Euclid) | caesar-and-affine, sections 5 to 7 |
+| Frequency analysis | frequency-analysis, sections 1 and 2 |
+| Chi-squared statistic | frequency-analysis, section 3 |
+| Index of coincidence | polyalphabetic-analysis, section 1 |
+| Kasiski examination | polyalphabetic-analysis, section 2 |
+| Vigenère cryptanalysis | polyalphabetic-analysis, sections 3 to 5 |
+
+The HTTP interface is summarised in [../api.md](../api.md).

@@ -1,6 +1,6 @@
-"""Endpoints for the algebra module: Caesar and affine ciphers.
+"""Endpoints for the algebra module: Caesar, affine and Vigenere ciphers.
 
-All four endpoints are ``POST`` and live under ``/api/v1/algebra``. Every client error has
+All six endpoints are ``POST`` and live under ``/api/v1/algebra``. Every client error has
 the uniform body described in ``app.core.errors`` (``detail`` is a list of ``loc``/``msg``/
 ``type`` objects, and the offending input is never echoed back):
 
@@ -23,6 +23,8 @@ from app.modules.algebra.schemas import (
     CaesarRequest,
     CaesarResponse,
     Operation,
+    VigenereRequest,
+    VigenereResponse,
 )
 
 router = APIRouter(prefix="/algebra", tags=["algebra"])
@@ -76,6 +78,23 @@ def _affine(request: AffineRequest, operation: Operation) -> AffineResponse:
     )
 
 
+def _vigenere(request: VigenereRequest, operation: Operation) -> VigenereResponse:
+    try:
+        shifts = ciphers.vigenere_shifts(request.key)
+        run = ciphers.vigenere_encrypt if operation == "encrypt" else ciphers.vigenere_decrypt
+        output = run(request.text, request.key)
+    except ciphers.InvalidKeyError as error:
+        raise _invalid_key(error) from error
+    return VigenereResponse(
+        operation=operation,
+        input=request.text,
+        output=output,
+        key=request.key,
+        key_shifts=list(shifts),
+        key_length=len(shifts),
+    )
+
+
 @router.post(
     "/caesar/encrypt",
     response_model=CaesarResponse,
@@ -114,3 +133,23 @@ def affine_encrypt(request: AffineRequest) -> AffineResponse:
 )
 def affine_decrypt(request: AffineRequest) -> AffineResponse:
     return _affine(request, "decrypt")
+
+
+@router.post(
+    "/vigenere/encrypt",
+    response_model=VigenereResponse,
+    responses=_ERRORS,
+    summary="Vigenere encryption: C_i = (P_i + K_i) mod 26, keyword repeating over the letters",
+)
+def vigenere_encrypt(request: VigenereRequest) -> VigenereResponse:
+    return _vigenere(request, "encrypt")
+
+
+@router.post(
+    "/vigenere/decrypt",
+    response_model=VigenereResponse,
+    responses=_ERRORS,
+    summary="Vigenere decryption: P_i = (C_i - K_i + 26) mod 26",
+)
+def vigenere_decrypt(request: VigenereRequest) -> VigenereResponse:
+    return _vigenere(request, "decrypt")

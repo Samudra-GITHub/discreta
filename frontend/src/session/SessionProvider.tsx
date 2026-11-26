@@ -32,6 +32,13 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     (selection, plaintext) => {
       if (selection.cipher === 'caesar') {
         load({ cipher: 'caesar', operation: 'encrypt', text: plaintext, key: String(selection.candidate.key) })
+      } else if (selection.cipher === 'vigenere') {
+        load({
+          cipher: 'vigenere',
+          operation: 'encrypt',
+          text: plaintext,
+          keyword: selection.candidate.shortest_equivalent_key,
+        })
       } else {
         load({
           cipher: 'affine',

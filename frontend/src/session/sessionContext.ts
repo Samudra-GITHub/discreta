@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 import type { CipherLab } from '../modules/algebra/useCipherLab'
-import type { AffineCandidate, CaesarCandidate } from '../types/analysis'
+import type { AffineCandidate, CaesarCandidate, VigenereKeyCandidate } from '../types/analysis'
 import type { AnalysisSession } from './useAnalysisSession'
 
 export interface Session {
@@ -17,7 +17,8 @@ export interface Session {
   sendCandidateToWorkspace: (
     candidate:
       | { cipher: 'caesar'; candidate: CaesarCandidate }
-      | { cipher: 'affine'; candidate: AffineCandidate },
+      | { cipher: 'affine'; candidate: AffineCandidate }
+      | { cipher: 'vigenere'; candidate: VigenereKeyCandidate },
     plaintext: string,
   ) => void
   /** Forget everything: workspace inputs and results, the analysis text and its results. */

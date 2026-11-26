@@ -1,4 +1,4 @@
-"""Endpoints for ciphertext analysis: letter frequencies and statistical key search.
+"""Endpoints for ciphertext analysis: letter frequencies, key search and Vigenere investigation.
 
 All endpoints are ``POST`` under ``/api/v1/analysis`` and use the uniform error body of
 ``app.core.errors``: 422 for malformed input (and ``no_letters`` when a key search is asked
@@ -7,16 +7,21 @@ to rank a text that has no ASCII letters), 413 for an oversized body.
 
 from __future__ import annotations
 
+from dataclasses import asdict
+
 from fastapi import APIRouter
 
 from app.core.errors import ClientError, ErrorResponse
-from app.modules.analysis import cryptanalysis, frequency
+from app.modules.analysis import cryptanalysis, frequency, vigenere_analysis
 from app.modules.analysis.schemas import (
     AffineSearchRequest,
     AffineSearchResponse,
     CaesarCrackResponse,
     FrequencyResponse,
     TextRequest,
+    VigenereCandidatesRequest,
+    VigenereCandidatesResponse,
+    VigenereLengthsResponse,
 )
 
 router = APIRouter(prefix="/analysis", tags=["analysis"])
@@ -30,7 +35,10 @@ _ERRORS = {
     413: {"model": ErrorResponse, "description": "Request body larger than the size limit."},
     422: {
         "model": ErrorResponse,
-        "description": "Malformed request, or a text with no letters (type `no_letters`).",
+        "description": (
+            "Malformed request, a text with no letters (`no_letters`), too little text "
+            "(`insufficient_text`) or an unusable key length (`invalid_key_length`)."
+        ),
     },
 }
 
@@ -57,6 +65,7 @@ def letter_frequency(request: TextRequest) -> FrequencyResponse:
         least_frequent=list(result.least_frequent),
         absent=list(result.absent),
         chi_squared=result.chi_squared,
+        index_of_coincidence=result.index_of_coincidence,
         reference=REFERENCE,
     )
 
@@ -101,6 +110,52 @@ def search_affine(request: AffineSearchRequest) -> AffineSearchResponse:
         candidates=[c.__dict__ for c in result.candidates],
         separation=result.separation,
     )
+
+
+
+
+def _insufficient(error: vigenere_analysis.InsufficientTextError) -> ClientError:
+    return ClientError(422, "insufficient_text", str(error), ("body", "text"))
+
+
+@router.post(
+    "/vigenere/lengths",
+    response_model=VigenereLengthsResponse,
+    responses=_ERRORS,
+    summary="Index of coincidence, Kasiski examination and ranked Vigenere key lengths",
+)
+def vigenere_lengths(request: TextRequest) -> VigenereLengthsResponse:
+    try:
+        result = vigenere_analysis.analyse_lengths(request.text)
+    except vigenere_analysis.InsufficientTextError as error:
+        raise _insufficient(error) from error
+    return VigenereLengthsResponse.model_validate(
+        {
+            "letters": result.letters,
+            "index_of_coincidence": asdict(result.ic),
+            "kasiski": asdict(result.kasiski),
+            "lengths": [asdict(row) for row in result.lengths],
+            "suggested_length": result.suggested_length,
+            "reliability": result.reliability,
+            "note": result.note,
+        }
+    )
+
+
+@router.post(
+    "/vigenere/candidates",
+    response_model=VigenereCandidatesResponse,
+    responses=_ERRORS,
+    summary="Estimate each Vigenere key letter for a chosen key length and rank candidate keys",
+)
+def vigenere_candidates(request: VigenereCandidatesRequest) -> VigenereCandidatesResponse:
+    try:
+        result = vigenere_analysis.analyse_key_length(request.text, request.key_length)
+    except vigenere_analysis.InsufficientTextError as error:
+        raise _insufficient(error) from error
+    except vigenere_analysis.KeyLengthError as error:
+        raise ClientError(422, "invalid_key_length", str(error), ("body", "key_length")) from error
+    return VigenereCandidatesResponse.model_validate(asdict(result))
 
 
 __all__ = ["router"]

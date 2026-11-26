@@ -35,6 +35,8 @@ export interface FrequencyResponse {
   least_frequent: string[]
   absent: string[]
   chi_squared: number | null
+  /** IC = Σ f(f−1) / (N(N−1)); null below two letters. */
+  index_of_coincidence: number | null
   reference: string
 }
 
@@ -74,4 +76,98 @@ export interface AffineSearchResponse {
   separation: number | null
 }
 
-export type AnalysisKind = 'frequency' | 'caesar' | 'affine'
+export type AnalysisKind = 'frequency' | 'caesar' | 'affine' | 'vigenere'
+
+// ---- Vigenère investigation -----------------------------------------------------------
+
+export type IcReading = 'insufficient' | 'english_like' | 'intermediate' | 'flat'
+
+export interface IcResult {
+  letters: number
+  ic: number | null
+  english_ic: number
+  random_ic: number
+  reading: IcReading
+  reliability: Reliability
+  note: string
+  friedman_key_length: number | null
+}
+
+export interface KasiskiRepeat {
+  sequence: string
+  length: number
+  /** Position among the letters (from 0) of the earlier occurrence. */
+  first: number
+  second: number
+  distance: number
+}
+
+export interface KasiskiVote {
+  length: number
+  repeats: number
+  fraction: number
+  examples: KasiskiRepeat[]
+}
+
+export interface KasiskiResult {
+  letters: number
+  total_repeats: number
+  repeats: KasiskiRepeat[]
+  votes: KasiskiVote[]
+  distance_gcd: number | null
+  note: string
+}
+
+export interface LengthRow {
+  rank: number
+  length: number
+  smallest_column: number
+  mean_ic: number | null
+  plausible: boolean
+  kasiski_repeats: number
+  kasiski_fraction: number
+}
+
+export interface VigenereLengthsResponse {
+  letters: number
+  index_of_coincidence: IcResult
+  kasiski: KasiskiResult
+  lengths: LengthRow[]
+  suggested_length: number | null
+  reliability: Reliability
+  note: string
+}
+
+export interface ColumnOption {
+  shift: number
+  letter: string
+  chi_squared: number
+}
+
+export interface ColumnAnalysis {
+  position: number
+  size: number
+  best: ColumnOption
+  options: ColumnOption[]
+  separation: number | null
+  reliability: Reliability
+}
+
+export interface VigenereKeyCandidate {
+  rank: number
+  key: string
+  shortest_equivalent_key: string
+  shifts: number[]
+  column_chi_sum: number
+  text_chi_squared: number
+  plaintext: string
+}
+
+export interface VigenereCandidatesResponse {
+  letters: number
+  key_length: number
+  columns: ColumnAnalysis[]
+  candidates: VigenereKeyCandidate[]
+  reliability: Reliability
+  note: string
+}

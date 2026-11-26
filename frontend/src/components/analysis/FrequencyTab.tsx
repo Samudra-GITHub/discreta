@@ -63,12 +63,17 @@ export function FrequencyTab() {
             </Notice>
           )}
 
-          <dl className={`m-0 grid grid-cols-2 gap-x-6 gap-y-4 border-y border-line py-4 md:grid-cols-4 ${stale ? 'opacity-60' : ''}`}>
+          <dl className={`m-0 grid grid-cols-2 gap-x-6 gap-y-4 border-y border-line py-4 md:grid-cols-5 ${stale ? 'opacity-60' : ''}`}>
             <Stat label="Letters analysed" value={result.letters.toLocaleString('en-US')} note={`of ${result.total_characters.toLocaleString('en-US')} characters`} />
             <Stat
               label="χ² vs English"
               value={result.chi_squared === null ? '—' : fmtChi(result.chi_squared)}
               note="25 degrees of freedom"
+            />
+            <Stat
+              label="Index of coincidence"
+              value={result.index_of_coincidence === null ? '—' : result.index_of_coincidence.toFixed(4)}
+              note="English 0.0655, random 0.0385"
             />
             <Stat
               label="Most frequent"

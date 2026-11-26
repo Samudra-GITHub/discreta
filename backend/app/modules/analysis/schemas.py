@@ -76,6 +76,9 @@ class FrequencyResponse(BaseModel):
         description="chi-squared of the letter counts against English (25 degrees of freedom); "
         "null when the text has no letters."
     )
+    index_of_coincidence: float | None = Field(
+        description="IC = sum f(f-1) / (N(N-1)) of the letter counts; null below two letters."
+    )
     reference: str = Field(description="Source of the English reference frequencies.")
 
 
@@ -116,3 +119,111 @@ class AffineSearchResponse(BaseModel):
     plaintexts_included: int
     candidates: list[AffineCandidate] = Field(description="All 312 valid keys, best first.")
     separation: float | None
+
+
+# ---------------------------------------------------------------------------- Vigenere analysis
+
+MAX_KEY_LENGTH = 40
+
+
+class VigenereCandidatesRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    text: str = _TEXT
+    key_length: int = Field(
+        strict=True,
+        ge=1,
+        le=MAX_KEY_LENGTH,
+        description="Key length to investigate (1 to 40). It cannot exceed the number of letters.",
+    )
+
+
+class IcResult(BaseModel):
+    letters: int
+    ic: float | None = Field(description="Index of coincidence; null below two letters.")
+    english_ic: float = Field(description="Reference IC of English text (about 0.0655).")
+    random_ic: float = Field(description="IC of uniformly random letters (1/26).")
+    reading: Literal["insufficient", "english_like", "intermediate", "flat"]
+    reliability: Reliability
+    note: str
+    friedman_key_length: float | None = Field(
+        description="Friedman's rough key-length estimate from the IC; null when undefined."
+    )
+
+
+class KasiskiRepeat(BaseModel):
+    sequence: str = Field(description="The repeated letters, upper-cased (at most 20 shown).")
+    length: int
+    first: int = Field(description="Position among the letters (from 0) of the earlier occurrence.")
+    second: int = Field(description="Position of the later occurrence.")
+    distance: int = Field(description="second - first.")
+
+
+class KasiskiVote(BaseModel):
+    length: int
+    repeats: int = Field(description="Number of repeat distances this key length divides.")
+    fraction: float = Field(description="repeats divided by the total number of repeats.")
+    examples: list[KasiskiRepeat]
+
+
+class KasiskiResult(BaseModel):
+    letters: int
+    total_repeats: int
+    repeats: list[KasiskiRepeat] = Field(description="Longest first, at most 100.")
+    votes: list[KasiskiVote] = Field(description="Ranked: most repeats first, then shorter length.")
+    distance_gcd: int | None = Field(description="gcd of all repeat distances; null without repeats.")
+    note: str
+
+
+class LengthRow(BaseModel):
+    rank: int
+    length: int
+    smallest_column: int
+    mean_ic: float | None
+    plausible: bool = Field(description="Mean column IC is at least 0.055 and within 0.005 of the best in the table.")
+    kasiski_repeats: int
+    kasiski_fraction: float
+
+
+class VigenereLengthsResponse(BaseModel):
+    letters: int
+    index_of_coincidence: IcResult
+    kasiski: KasiskiResult
+    lengths: list[LengthRow] = Field(description="Candidate key lengths 1..20, ranked.")
+    suggested_length: int | None = Field(description="Shortest plausible length; null if none qualifies.")
+    reliability: Reliability
+    note: str
+
+
+class ColumnOption(BaseModel):
+    shift: int
+    letter: str
+    chi_squared: float
+
+
+class ColumnAnalysis(BaseModel):
+    position: int = Field(description="0-based position within the key.")
+    size: int = Field(description="Letters in this column.")
+    best: ColumnOption
+    options: list[ColumnOption] = Field(description="The best shifts for this column, best first.")
+    separation: float | None
+    reliability: Reliability
+
+
+class KeyCandidate(BaseModel):
+    rank: int
+    key: str = Field(description="A valid keyword of A-Z letters.")
+    shortest_equivalent_key: str
+    shifts: list[int]
+    column_chi_sum: float = Field(description="Sum of the chosen shifts' column chi-squared values.")
+    text_chi_squared: float = Field(description="Chi-squared of the whole decrypted text.")
+    plaintext: str
+
+
+class VigenereCandidatesResponse(BaseModel):
+    letters: int
+    key_length: int
+    columns: list[ColumnAnalysis]
+    candidates: list[KeyCandidate] = Field(description="Best first, at most 10.")
+    reliability: Reliability
+    note: str

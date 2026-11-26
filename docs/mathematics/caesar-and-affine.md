@@ -326,8 +326,8 @@ data. The reasons, from the weakest point to the most structural:
   letter, so the set of letter counts is the same, only attached to different letters: the
   frequencies are *permuted, not eliminated*. In English the most common letters (`E`, `T`,
   `A`) therefore still stand out as the most common ciphertext letters, and repeated letters
-  and word shapes (`LL`, `THE`) keep their form. This is what the planned frequency analyzer
-  will exploit.
+  and word shapes (`LL`, `THE`) keep their form. This is what the Analysis Lab's frequency
+  analysis exploits (see [Frequency analysis](frequency-analysis.md)).
 - **Deterministic encryption.** The same plaintext and key always give the same ciphertext.
   There is no random nonce or IV, so an eavesdropper sees exactly which parts of a message
   repeat, and identical messages are recognisable.
@@ -349,5 +349,6 @@ data. The reasons, from the weakest point to the most structural:
   Python's parser before the API can validate them.
 - **Duplicate keys in a JSON body** are accepted and the last one wins, as in most JSON
   parsers.
-- **No cryptanalysis yet.** Frequency analysis and automatic key recovery are future work;
-  section 11 only describes the attacks.
+- **Attacks live elsewhere.** This note covers only the ciphers. Section 11 describes the weaknesses; the
+  frequency analysis and key search that exploit them are in [Frequency analysis](frequency-analysis.md), and the
+  Vigenère cipher is in [The Vigenère cipher](vigenere.md).

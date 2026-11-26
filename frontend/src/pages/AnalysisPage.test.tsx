@@ -25,7 +25,7 @@ async function enter(user: ReturnType<typeof renderApp>['user'], text = CIPHERTE
 const tab = (name: string) => screen.getByRole('tab', { name })
 
 describe('the Analysis Lab shell', () => {
-  it('has the three internal tabs and is not extra navigation', () => {
+  it('has the four internal tabs and is not extra navigation', () => {
     mockBackend()
     open()
 
@@ -33,6 +33,7 @@ describe('the Analysis Lab shell', () => {
       'Frequency Analysis',
       'Caesar Analysis',
       'Affine Analysis',
+      'Vigenère Analysis',
     ])
     expect(screen.getAllByRole('navigation')).toHaveLength(1)
     expect(tab('Frequency Analysis').getAttribute('aria-selected')).toBe('true')
@@ -48,11 +49,11 @@ describe('the Analysis Lab shell', () => {
     expect(tab('Caesar Analysis').getAttribute('aria-selected')).toBe('true')
     expect(document.activeElement).toBe(tab('Caesar Analysis'))
     await user.keyboard('{End}')
-    expect(tab('Affine Analysis').getAttribute('aria-selected')).toBe('true')
+    expect(tab('Vigenère Analysis').getAttribute('aria-selected')).toBe('true')
     await user.keyboard('{ArrowRight}')
     expect(tab('Frequency Analysis').getAttribute('aria-selected')).toBe('true')
     await user.keyboard('{ArrowLeft}')
-    expect(tab('Affine Analysis').getAttribute('aria-selected')).toBe('true')
+    expect(tab('Vigenère Analysis').getAttribute('aria-selected')).toBe('true')
   })
 
   it('keeps one ciphertext for all tabs', async () => {

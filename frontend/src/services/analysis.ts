@@ -2,6 +2,8 @@ import type {
   AffineSearchResponse,
   CaesarCrackResponse,
   FrequencyResponse,
+  VigenereCandidatesResponse,
+  VigenereLengthsResponse,
 } from '../types/analysis'
 import { ApiError, apiPost, type RequestOptions } from './api'
 
@@ -41,7 +43,8 @@ function isFrequency(value: unknown): value is FrequencyResponse {
     isStrArray(value.most_frequent) &&
     isStrArray(value.least_frequent) &&
     isStrArray(value.absent) &&
-    (value.chi_squared === null || isNum(value.chi_squared))
+    (value.chi_squared === null || isNum(value.chi_squared)) &&
+    (value.index_of_coincidence === null || isNum(value.index_of_coincidence))
   )
 }
 
@@ -81,6 +84,120 @@ function isAffineSearch(value: unknown): value is AffineSearchResponse {
   )
 }
 
+const isNumOrNull = (value: unknown): value is number | null => value === null || isNum(value)
+
+function isRepeat(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    isStr(value.sequence) &&
+    isNum(value.length) &&
+    isNum(value.first) &&
+    isNum(value.second) &&
+    isNum(value.distance)
+  )
+}
+
+function isIcResult(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    isNum(value.letters) &&
+    isNumOrNull(value.ic) &&
+    isNum(value.english_ic) &&
+    isNum(value.random_ic) &&
+    ['insufficient', 'english_like', 'intermediate', 'flat'].includes(String(value.reading)) &&
+    isReliability(value.reliability) &&
+    isStr(value.note) &&
+    isNumOrNull(value.friedman_key_length)
+  )
+}
+
+function isKasiski(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    isNum(value.letters) &&
+    isNum(value.total_repeats) &&
+    Array.isArray(value.repeats) &&
+    value.repeats.every(isRepeat) &&
+    Array.isArray(value.votes) &&
+    value.votes.every(
+      (v) =>
+        isRecord(v) &&
+        isNum(v.length) &&
+        isNum(v.repeats) &&
+        isNum(v.fraction) &&
+        Array.isArray(v.examples) &&
+        v.examples.every(isRepeat),
+    ) &&
+    isNumOrNull(value.distance_gcd) &&
+    isStr(value.note)
+  )
+}
+
+function isVigenereLengths(value: unknown): value is VigenereLengthsResponse {
+  return (
+    isRecord(value) &&
+    isNum(value.letters) &&
+    isIcResult(value.index_of_coincidence) &&
+    isKasiski(value.kasiski) &&
+    Array.isArray(value.lengths) &&
+    value.lengths.length > 0 &&
+    value.lengths.every(
+      (r) =>
+        isRecord(r) &&
+        isNum(r.rank) &&
+        isNum(r.length) &&
+        isNum(r.smallest_column) &&
+        isNumOrNull(r.mean_ic) &&
+        typeof r.plausible === 'boolean' &&
+        isNum(r.kasiski_repeats) &&
+        isNum(r.kasiski_fraction),
+    ) &&
+    isNumOrNull(value.suggested_length) &&
+    isReliability(value.reliability) &&
+    isStr(value.note)
+  )
+}
+
+const isOption = (o: unknown) => isRecord(o) && isNum(o.shift) && isStr(o.letter) && isNum(o.chi_squared)
+
+function isVigenereCandidates(value: unknown): value is VigenereCandidatesResponse {
+  return (
+    isRecord(value) &&
+    isNum(value.letters) &&
+    isNum(value.key_length) &&
+    Array.isArray(value.columns) &&
+    value.columns.length === value.key_length &&
+    value.columns.every(
+      (c) =>
+        isRecord(c) &&
+        isNum(c.position) &&
+        isNum(c.size) &&
+        isOption(c.best) &&
+        Array.isArray(c.options) &&
+        c.options.every(isOption) &&
+        isNumOrNull(c.separation) &&
+        isReliability(c.reliability),
+    ) &&
+    Array.isArray(value.candidates) &&
+    value.candidates.length > 0 &&
+    value.candidates.every(
+      (c) =>
+        isRecord(c) &&
+        isNum(c.rank) &&
+        isStr(c.key) &&
+        /^[A-Z]+$/.test(c.key) &&
+        isStr(c.shortest_equivalent_key) &&
+        Array.isArray(c.shifts) &&
+        c.shifts.every(isNum) &&
+        isNum(c.column_chi_sum) &&
+        isNum(c.text_chi_squared) &&
+        isStr(c.plaintext),
+    ) &&
+    isReliability(value.reliability) &&
+    isStr(value.note)
+  )
+}
+
 async function post<T>(
   path: string,
   body: unknown,
@@ -112,5 +229,19 @@ export const runAffineSearch = (
     { text, plaintext_limit: plaintextLimit },
     isAffineSearch,
     'affine analysis',
+    { timeoutMs: 15_000, ...options },
+  )
+
+/** IC, Kasiski examination and ranked key lengths for a suspected Vigenère ciphertext. */
+export const runVigenereLengths = (text: string, options?: RequestOptions) =>
+  post('/vigenere/lengths', { text }, isVigenereLengths, 'Vigenère key-length', { timeoutMs: 15_000, ...options })
+
+/** Estimate each key letter for `keyLength` and rank candidate keys. */
+export const runVigenereCandidates = (text: string, keyLength: number, options?: RequestOptions) =>
+  post(
+    '/vigenere/candidates',
+    { text, key_length: keyLength },
+    isVigenereCandidates,
+    'Vigenère candidate',
     { timeoutMs: 15_000, ...options },
   )

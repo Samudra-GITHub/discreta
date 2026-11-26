@@ -21,7 +21,7 @@ export function variantFor(pathname: string): AtmosphereVariant {
 const LABELS: Record<AtmosphereVariant, readonly string[]> = {
   overview: ['ENCRYPTION', 'ANALYSIS', 'KEYSPACE 312', 'MOD 26'],
   workspace: ['x + k  mod 26', 'gcd(a, 26) = 1', 'a · a⁻¹ ≡ 1', 'ENCRYPTION'],
-  analysis: ['FREQUENCY', 'χ² · 25 DOF', 'KEYSPACE 26', 'KEYSPACE 312'],
+  analysis: ['FREQUENCY', 'χ² · 25 DOF', 'KEYSPACE 26', 'KEYSPACE 312', 'IC · 0.0655'],
   settings: [],
 }
 

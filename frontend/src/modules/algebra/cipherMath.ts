@@ -15,6 +15,8 @@ export const MODULUS = 26
 
 /** Largest key magnitude the API accepts: 2^53 - 1, the largest exact JavaScript integer. */
 export const MAX_KEY = Number.MAX_SAFE_INTEGER
+/** Longest Vigenère keyword the API accepts. */
+export const MAX_KEYWORD_LENGTH = 64
 /** Longest message the API accepts, counted in characters (Unicode code points). */
 export const MAX_TEXT_LENGTH = 10_000
 
@@ -48,6 +50,31 @@ export function describeKeyProblem(problem: KeyProblem, label: string): string {
       return `${label} must be a whole number, such as 3 or −7.`
     case 'out-of-range':
       return `${label} must be between −${MAX_KEY} and ${MAX_KEY} (2⁵³ − 1).`
+  }
+}
+
+export type KeywordProblem = 'empty' | 'invalid-characters' | 'too-long'
+
+export type KeywordParse =
+  | { ok: true; value: string; shifts: number[] }
+  | { ok: false; problem: KeywordProblem }
+
+/** Parse what the user typed into a Vigenère keyword: 1 to 64 ASCII letters, nothing else. */
+export function parseKeyword(raw: string): KeywordParse {
+  if (raw === '') return { ok: false, problem: 'empty' }
+  if (!/^[A-Za-z]+$/.test(raw)) return { ok: false, problem: 'invalid-characters' }
+  if (raw.length > MAX_KEYWORD_LENGTH) return { ok: false, problem: 'too-long' }
+  return { ok: true, value: raw, shifts: Array.from(raw.toUpperCase(), (c) => c.charCodeAt(0) - 65) }
+}
+
+export function describeKeywordProblem(problem: KeywordProblem): string {
+  switch (problem) {
+    case 'empty':
+      return 'Enter a keyword of at least one letter.'
+    case 'invalid-characters':
+      return 'The keyword may contain only the letters A to Z: no spaces, digits, punctuation or accents.'
+    case 'too-long':
+      return `The keyword may have at most ${MAX_KEYWORD_LENGTH} letters.`
   }
 }
 
@@ -138,6 +165,8 @@ export interface WorkedStep {
   result: number
   /** The letter the backend returned at this position. */
   output: string
+  /** For Vigenère: the key letter that was applied to this letter. */
+  keyLetter?: string
 }
 
 export type WorkedExample =
@@ -162,8 +191,21 @@ export function buildWorkedExample(response: CipherResponse, maxSteps = 5): Work
   const outputs = Array.from(response.output)
   if (inputs.length !== outputs.length) return { status: 'unverified' }
 
-  let step: (n: number) => { expression: string; raw: number }
-  if (response.cipher === 'caesar') {
+  let step: (n: number, letterIndex: number) => { expression: string; raw: number }
+  if (response.cipher === 'vigenere') {
+    const shifts = response.key_shifts
+    if (shifts.length === 0 || !shifts.every(inResidueRange)) return { status: 'unverified' }
+    step =
+      response.operation === 'encrypt'
+        ? (n, i) => {
+            const k = shifts[i % shifts.length] ?? 0
+            return { expression: `${n} + ${k}`, raw: n + k }
+          }
+        : (n, i) => {
+            const k = shifts[i % shifts.length] ?? 0
+            return { expression: `${n} − ${k}`, raw: n - k }
+          }
+  } else if (response.cipher === 'caesar') {
     const k = response.effective_key
     if (!inResidueRange(k)) return { status: 'unverified' }
     step =
@@ -194,11 +236,17 @@ export function buildWorkedExample(response: CipherResponse, maxSteps = 5): Work
     }
     lettersTotal += 1
     const number = code - (upper ? 65 : 97)
-    const { expression, raw } = step(number)
+    const { expression, raw } = step(number, lettersTotal - 1)
     const result = reduce(raw)
     const expected = String.fromCharCode(result + (upper ? 65 : 97))
     if (expected !== out) return { status: 'unverified' }
-    if (steps.length < maxSteps) steps.push({ input: char, number, expression, raw, result, output: out })
+    if (steps.length < maxSteps) {
+      const keyLetter =
+        response.cipher === 'vigenere'
+          ? String.fromCharCode(65 + (response.key_shifts[(lettersTotal - 1) % response.key_shifts.length] ?? 0))
+          : undefined
+      steps.push({ input: char, number, expression, raw, result, output: out, keyLetter })
+    }
   }
 
   return lettersTotal === 0 ? { status: 'no-letters' } : { status: 'ok', steps, lettersTotal }

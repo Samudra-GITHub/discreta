@@ -12,14 +12,14 @@ Suggested outline:
 6. Evaluation, limitations and future work
 7. References
 
-## Progress
+## Release report
 
-[progress-report.md](progress-report.md) summarises what has been built and verified so far.
+[progress-report.md](progress-report.md) is the final release report for v1.0.0: what was built, the test results,
+the mathematical verification and the known limitations.
 
 ## Screenshots
 
-* `screenshots-v0.4.0/` (current, kept locally and not committed) holds the Overview, Cipher Workspace (Caesar,
-  affine, invalid multiplier), Analysis Lab (frequency, Caesar, affine) and Settings pages at 375, 768, 1024 and
-  1440 px in the light and dark themes, plus two wide shots (1680 px) showing the background layer. They were
-  taken against the real backend.
-* `screenshots-v0.3.0/` is the superseded earlier design.
+* `screenshots-v1.0.0/` (committed) shows the final application running against the real backend: the Overview in
+  light and dark, the Cipher Workspace with Caesar, affine and Vigenère encryption and decryption, the Frequency,
+  Caesar, Affine and Vigenère analysis tabs, Settings, and the mobile layout with the floating taskbar.
+* Earlier folders (`screenshots-v0.3.0/`, `screenshots-v0.4.0/`, if present) are local only and show superseded designs.

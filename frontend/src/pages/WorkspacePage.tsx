@@ -10,6 +10,7 @@ import type { CipherId, CipherOperation, CipherResponse } from '../types/cipher'
 const CIPHERS = [
   { value: 'caesar', label: 'Caesar' },
   { value: 'affine', label: 'Affine' },
+  { value: 'vigenere', label: 'Vigenère' },
 ] as const satisfies readonly { value: CipherId; label: string }[]
 
 const OPERATIONS = [
@@ -21,6 +22,9 @@ const OPERATIONS = [
 function summary(r: CipherResponse) {
   if (r.cipher === 'caesar') {
     return `Caesar · ${r.operation} · k = ${r.key}${r.key !== r.effective_key ? ` (acts as ${r.effective_key})` : ''}`
+  }
+  if (r.cipher === 'vigenere') {
+    return `Vigenère · ${r.operation} · key ${r.key.toUpperCase()} (${r.key_length} letter${r.key_length === 1 ? '' : 's'})`
   }
   return `Affine · ${r.operation} · a = ${r.effective_a}, b = ${r.effective_b}, a⁻¹ = ${r.a_inverse}`
 }
@@ -35,7 +39,7 @@ export function WorkspacePage() {
   return (
     <>
       <PageHeader eyebrow="01 · Workspace" title="Cipher Workspace">
-        Encrypt or decrypt a message with a Caesar or affine cipher. The backend does the arithmetic; this page shows
+        Encrypt or decrypt a message with a Caesar, affine or Vigenère cipher. The backend does the arithmetic; this page shows
         the key, the formula and the result.
       </PageHeader>
 

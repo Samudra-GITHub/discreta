@@ -29,11 +29,13 @@ interface ExplorerProps {
   initialRows: number
   /** What the table lists, for the caption and the toggle, e.g. "keys". */
   noun: string
+  /** Header of the score column; χ² by default. */
+  scoreHeader?: string
   children?: ReactNode
 }
 
 /** A ranked table of candidate keys with a compact preview of each decryption. */
-export function CandidateTable({ items, selectedId, onSelect, keyHeader, initialRows, noun }: ExplorerProps) {
+export function CandidateTable({ items, selectedId, onSelect, keyHeader, initialRows, noun, scoreHeader = 'χ²' }: ExplorerProps) {
   const [all, setAll] = useState(false)
   const maxChi = Math.max(...items.map((item) => item.chi))
   const visible = all ? items : items.slice(0, initialRows)
@@ -49,7 +51,7 @@ export function CandidateTable({ items, selectedId, onSelect, keyHeader, initial
             <tr className="border-b border-line-strong text-left text-xs text-fg-muted [&>th]:py-2 [&>th]:pr-3 [&>th]:font-medium">
               <th scope="col">Rank</th>
               <th scope="col">{keyHeader}</th>
-              <th scope="col" className="sm:min-w-28">χ²</th>
+              <th scope="col" className="sm:min-w-28">{scoreHeader}</th>
               <th scope="col" className="hidden md:table-cell">Decrypted start</th>
               <th scope="col" className="text-right">
                 <span className="sr-only">Inspect</span>
@@ -119,6 +121,10 @@ interface InspectorProps {
   error: LabError | null
   /** Extra facts such as the modular inverse. */
   facts?: string[]
+  /** What the score is called, for example "χ²" or "Σ column χ²". */
+  scoreLabel?: string
+  /** Label of the send button. */
+  sendLabel?: string
   onSend: () => void
 }
 
@@ -133,6 +139,7 @@ export function CandidateInspector({
   loading,
   error,
   facts = [],
+  scoreLabel = 'χ²',
   onSend,
 }: InspectorProps) {
   const ratio = bestChi > 0 ? chi / bestChi : null
@@ -143,7 +150,7 @@ export function CandidateInspector({
           Inspecting <span className="num">{title}</span>
         </h3>
         <p className="num text-xs text-fg-muted">
-          rank {rank} of {total} · χ² {fmtChi(chi)}
+          rank {rank} of {total} · {scoreLabel} {fmtChi(chi)}
           {ratio !== null && rank !== 1 && ` · ${ratio.toFixed(2)}× the best`}
         </p>
       </div>

@@ -10,7 +10,7 @@ export const json = (body: unknown, status = 200) =>
 const HEALTH = {
   status: 'ok',
   service: 'discreta-backend',
-  version: '0.4.0',
+  version: '1.0.0',
   message: 'DISCRETA backend is running.',
   timestamp: '2026-01-01T00:00:00Z',
 }
@@ -120,6 +120,7 @@ export function frequencyReply(text: string) {
     least_frequent: [...occurring].reverse().slice(0, 3).map((i) => String.fromCharCode(65 + i)),
     absent: counts.flatMap((c, i) => (c === 0 ? [String.fromCharCode(65 + i)] : [])),
     chi_squared: n ? 123.4 : null,
+    index_of_coincidence: n >= 2 ? counts.reduce((acc, f) => acc + f * (f - 1), 0) / (n * (n - 1)) : null,
     reference: 'English letter frequencies from R. Lewand, Cryptological Mathematics (2000), normalised to sum to 100%.',
   }
 }
@@ -163,6 +164,105 @@ export function affineSearchReply(best: [number, number], limit = 20, over: Reco
       plaintext: i < limit ? `affine candidate ${a},${b}` : null,
     })),
     separation: 1.3,
+    ...over,
+  }
+}
+
+// ---- Vigenère fixtures ----------------------------------------------------------------
+
+export const vigenereReply = (over: Record<string, unknown> = {}) => ({
+  cipher: 'vigenere',
+  operation: 'encrypt',
+  input: 'ATTACKATDAWN',
+  output: 'LXFOPVEFRNHR',
+  key: 'LEMON',
+  key_shifts: [11, 4, 12, 14, 13],
+  key_length: 5,
+  ...over,
+})
+
+const repeat = (sequence: string, first: number, second: number) => ({
+  sequence,
+  length: sequence.length,
+  first,
+  second,
+  distance: second - first,
+})
+
+/** A key-length reply in which length 5 is suggested and the rest are not plausible. */
+export function lengthsReply(over: Record<string, unknown> = {}) {
+  const lengths = Array.from({ length: 20 }, (_, i) => i + 1)
+  const rows = lengths.map((length) => ({
+    length,
+    smallest_column: Math.floor(300 / length),
+    mean_ic: length % 5 === 0 ? 0.066 : 0.042,
+    plausible: length === 5,
+    kasiski_repeats: length === 5 ? 9 : length === 2 ? 4 : 0,
+    kasiski_fraction: length === 5 ? 0.9 : length === 2 ? 0.4 : 0,
+  }))
+  const ranked = [...rows.filter((r) => r.plausible), ...rows.filter((r) => !r.plausible).sort((a, b) => b.mean_ic - a.mean_ic || a.length - b.length)]
+  return {
+    letters: 300,
+    index_of_coincidence: {
+      letters: 300,
+      ic: 0.0427,
+      english_ic: 0.0655,
+      random_ic: 0.0385,
+      reading: 'flat',
+      reliability: 'adequate',
+      note: 'The IC is close to random letters. The IC is evidence, not proof.',
+      friedman_key_length: 5.2,
+    },
+    kasiski: {
+      letters: 300,
+      total_repeats: 10,
+      repeats: [repeat('THEQ', 3, 38), repeat('ABC', 10, 25)],
+      votes: [
+        { length: 5, repeats: 9, fraction: 0.9, examples: [repeat('THEQ', 3, 38)] },
+        { length: 2, repeats: 4, fraction: 0.4, examples: [repeat('ABC', 10, 24)] },
+      ],
+      distance_gcd: 1,
+      note: '10 repeated sequences found. A distance is often a multiple of the key length, but chance also repeats short sequences, so these counts are evidence, not proof.',
+    },
+    lengths: ranked.map((r, i) => ({ rank: i + 1, ...r })),
+    suggested_length: 5,
+    reliability: 'adequate',
+    note: 'Length 5 is the shortest whose columns look like English. This is a suggestion, not proof.',
+    ...over,
+  }
+}
+
+/** A candidate reply for `key`, with `alt` as a runner-up key. */
+export function candidatesReply(key = 'LEMON', over: Record<string, unknown> = {}) {
+  const shifts = Array.from(key, (c) => c.charCodeAt(0) - 65)
+  const make = (k: string, rank: number) => ({
+    rank,
+    key: k,
+    shortest_equivalent_key: k,
+    shifts: Array.from(k, (c) => c.charCodeAt(0) - 65),
+    column_chi_sum: 30 * rank,
+    text_chi_squared: 40 + 20 * rank,
+    plaintext: `plaintext for ${k}`,
+  })
+  const alt = key.slice(0, -1) + (key.endsWith('A') ? 'B' : 'A')
+  return {
+    letters: 300,
+    key_length: key.length,
+    columns: shifts.map((shift, position) => ({
+      position,
+      size: Math.floor(300 / key.length),
+      best: { shift, letter: key[position], chi_squared: 20 + position },
+      options: [
+        { shift, letter: key[position], chi_squared: 20 + position },
+        { shift: (shift + 1) % 26, letter: String.fromCharCode(65 + ((shift + 1) % 26)), chi_squared: 90 },
+        { shift: (shift + 2) % 26, letter: String.fromCharCode(65 + ((shift + 2) % 26)), chi_squared: 120 },
+      ],
+      separation: 4.5,
+      reliability: 'adequate',
+    })),
+    candidates: [make(key, 1), make(alt, 2)],
+    reliability: 'adequate',
+    note: 'Each key letter is estimated from a column of 60 to 60 letters. That is enough for usable estimates, but the key is still a statistical suggestion, not proof.',
     ...over,
   }
 }

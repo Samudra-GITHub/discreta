@@ -2,80 +2,127 @@
 
 **A Classical Cryptography and Frequency Analysis Laboratory**
 
-Team: **BugSquad** (2 members)
+Team: **BugSquad** (2 members) · Version **1.0.0**
 
-DISCRETA is a web application for encrypting, decrypting and *breaking* classical ciphers. Encrypt a
-message with a Caesar or affine cipher, send the ciphertext to the Analysis Lab, count its letters,
-compare them with English, and rank every possible key by a chi-squared score. The mathematics behind
-it is discrete mathematics: modular arithmetic over ℤ₂₆, the Euclidean algorithm, modular inverses and
-frequency distributions.
+DISCRETA is a web application for encrypting, decrypting and *breaking* classical ciphers. Encrypt a message
+with a Caesar, affine or Vigenère cipher, send the ciphertext to the Analysis Lab, count its letters, compare
+them with English, rank every possible key, or investigate the key length of a repeating-key cipher with the
+index of coincidence and Kasiski examination. The mathematics behind it is discrete mathematics: modular
+arithmetic over ℤ₂₆, the Euclidean algorithm, modular inverses, probability and the χ² statistic.
 
-> **Status: v0.4.0, refocused on cryptography.** The interface is four destinations reached from a
-> floating glass taskbar: **Overview**, **Cipher Workspace**, **Analysis Lab** and **Settings**, in a light
-> and a dark theme. The backend implements Caesar and affine ciphers (hand-written gcd, extended Euclid
-> and modular inverse), letter-frequency analysis, the chi-squared statistic, a Caesar key search (26
-> keys) and an affine key search (all 312 valid keys). Results are statistical estimates, not proof, and
-> the ciphers are teaching tools, not secure encryption. See
-> [Caesar and affine ciphers](docs/mathematics/caesar-and-affine.md) and
-> [Frequency analysis](docs/mathematics/frequency-analysis.md). Vigenère, Kasiski examination and the index
-> of coincidence are not implemented.
+> **Academic and security disclaimer.** The ciphers in DISCRETA are historical and educational. They are
+> **not secure encryption** and must never be used to protect real data; the application exists to show why
+> they are easy to break. Every analysis result is a **statistical estimate**, not proof: short texts,
+> unusual texts and long keys can mislead it, and the interface says so.
 
-## Objectives
+## Objective
 
-1. Make classical cryptography tangible: encrypt, decrypt and analyse in one connected workspace.
-2. Keep the mathematics correct: every algorithm is tested against independent expected values, with
-   SymPy and the standard library as oracles only.
-3. Keep the backend the single source of truth for cryptographic and statistical calculations.
-4. Stay honest: the interface labels estimates as estimates and never presents a ranking as proof.
+Build one focused, correct and well-tested environment in which a student can encrypt a message, watch the
+arithmetic, and then attack the ciphertext with the same statistics a cryptanalyst would use. The mathematics
+supports the tools; the application is not a general mathematics course.
 
-## What you can do
+## Problem statement
 
-| Destination | Purpose |
+Classical ciphers are usually taught on paper, where the arithmetic is tedious and the attacks (frequency
+counting, χ² scoring, Kasiski examination) are hard to see working. DISCRETA does the arithmetic with a
+backend that is independently verified, shows the formula that applies to the current key, and makes every
+analysis step inspectable, while keeping measured facts, calculated values and statistical suggestions
+visibly separate.
+
+## Main features
+
+| Destination | What it does |
 | --- | --- |
 | **Overview** | What DISCRETA is, and the two entry points |
-| **Cipher Workspace** | Caesar and affine encryption and decryption, key controls, the relevant formula, the result, copy, swap, send to analysis |
-| **Analysis Lab** | Frequency Analysis (A–Z counts against English), Caesar Analysis (26 ranked shifts), Affine Analysis (312 ranked keys); inspect a candidate and send it back to the workspace |
+| **Cipher Workspace** | Caesar, affine and Vigenère encryption and decryption; key controls with validation; the one formula that applies; the result; worked steps checked against the backend; copy, swap, clear; send to the Analysis Lab |
+| **Analysis Lab** | **Frequency Analysis** (A–Z counts against English, χ², IC), **Caesar Analysis** (26 ranked shifts), **Affine Analysis** (312 ranked keys), **Vigenère Analysis** (IC, Kasiski, key-length ranking, key letters, candidate keys); inspect any candidate and send it back to the workspace |
 | **Settings** | Light, dark or system theme; clear the session; backend status |
+
+Navigation is a floating glass taskbar at the bottom; there is no sidebar and no dashboard. The workspace and
+the Analysis Lab share one in-memory session, so a result moves between them without retyping.
+
+## Supported ciphers
+
+| Cipher | Encryption | Decryption | Key |
+| --- | --- | --- | --- |
+| Caesar | E(x) = (x + k) mod 26 | D(y) = (y − k) mod 26 | any integer (reduced mod 26), 26 keys |
+| Affine | E(x) = (a·x + b) mod 26 | D(y) = a⁻¹(y − b) mod 26 | gcd(a, 26) = 1: 12 multipliers × 26 offsets = 312 keys |
+| Vigenère | Cᵢ = (Pᵢ + Kᵢ) mod 26 | Pᵢ = (Cᵢ − Kᵢ + 26) mod 26 | a keyword of 1 to 64 letters, repeating over the letters only |
+
+Only ASCII letters are enciphered and case is preserved; spaces, digits, punctuation and non-ASCII characters are
+copied unchanged (and, for Vigenère, do not use up a key letter).
+
+## Mathematical foundations
+
+Letters are numbers in ℤ₂₆ (`A = 0 … Z = 25`). The affine multiplier must be invertible, which happens exactly
+when gcd(a, 26) = 1; the inverse comes from the extended Euclidean algorithm (written by hand; SymPy is used
+only in the tests as an independent check). ℤ₂₆ is not a field: 14 of its 25 non-zero elements have no inverse.
+Details and proofs: [Caesar and affine](docs/mathematics/caesar-and-affine.md),
+[Vigenère](docs/mathematics/vigenere.md).
+
+## Statistical analysis methods
+
+* **Letter frequencies** against a normalised English reference table.
+* **χ² statistic**, χ² = Σ (Oᵢ − Eᵢ)² / Eᵢ on letter counts, to rank every Caesar and affine key.
+* **Index of coincidence**, IC = Σ fᵢ(fᵢ − 1) / (N(N − 1)), to separate monoalphabetic from polyalphabetic
+  patterns, and Friedman's rough key-length estimate.
+* **Kasiski examination**: repeated sequences, their distances and the key lengths those distances share.
+* **Vigenère key recovery**: mean column IC to rank key lengths, then χ² on each column for the key letters and
+  ranked candidate keys.
+
+Reliability flags mark short texts. See [Frequency analysis](docs/mathematics/frequency-analysis.md) and
+[Polyalphabetic analysis](docs/mathematics/polyalphabetic-analysis.md).
 
 ## Technology stack
 
-**Frontend:** React 19, TypeScript, Vite, Tailwind CSS 4, React Router, Lucide React, Vitest and Testing Library;
-fonts Space Grotesk, Inter and IBM Plex Mono (self-hosted)
+**Frontend:** React 19, TypeScript (strict), Vite 8, Tailwind CSS 4, React Router, Lucide icons, Vitest and Testing
+Library; Space Grotesk, Inter and IBM Plex Mono (self-hosted). **Backend:** Python 3.12, FastAPI, Uvicorn, Pydantic,
+pytest; SymPy (tests only).
 
-**Backend:** Python 3.12, FastAPI, Uvicorn, SymPy, Pytest
+## Architecture overview
 
-## Repository structure
+```text
+ Browser (React)  ──HTTP/JSON──▶  FastAPI backend
+ pages · session · services        algebra   (number theory, ciphers)
+ no cryptography in the UI         analysis  (frequency, χ², IC, Kasiski, Vigenère)
+```
+
+The backend is the only place that encrypts, decrypts or computes statistics; the frontend validates input,
+calls it, checks the shape of each reply and presents it. Every client error has one uniform body that never
+echoes the input, requests are size-limited, and each module is a package with its own router. See
+[docs/architecture/overview.md](docs/architecture/overview.md) and the [design system](docs/architecture/design-system.md).
+
+## Project directory structure
 
 ```text
 discreta/
-├── frontend/                 React + TypeScript + Vite application
-│   ├── src/
-│   │   ├── components/       Taskbar, shared UI; workspace/ (keys, formula), analysis/ (charts, tabs)
-│   │   ├── layouts/          App shell and navigation definition
-│   │   ├── pages/            One component per route
-│   │   ├── modules/          Frontend logic: algebra/ (keys, cipher state), analysis/ (readings)
-│   │   ├── session/          Shared workspace and analysis state
-│   │   ├── theme/            Light, dark and system themes
-│   │   ├── services/         Backend API client (config, request helper, health)
-│   │   ├── hooks/            React hooks (backend health polling)
-│   │   └── types/            Shared TypeScript types
-│   └── package.json
-├── backend/                  FastAPI service
+├── backend/
 │   ├── app/
-│   │   ├── api/v1/           Versioned HTTP routes (health, module list)
-│   │   ├── core/             Configuration, uniform error responses, request-size limit
-│   │   ├── modules/          algebra/ (ciphers, number theory), analysis/ (frequency, chi-squared, key search)
-│   │   └── main.py           Application factory and entry point
-│   ├── tests/                Pytest suite
-│   ├── requirements.txt      Runtime dependencies
-│   └── requirements-dev.txt  Runtime plus development and test dependencies
+│   │   ├── api/v1/            health, module list, router aggregation
+│   │   ├── core/              settings, uniform errors, request-size limit
+│   │   ├── modules/
+│   │   │   ├── algebra/       number_theory.py, ciphers.py, schemas.py, router.py
+│   │   │   └── analysis/      english, scoring, frequency, cryptanalysis,
+│   │   │                      coincidence, kasiski, vigenere_analysis, schemas, router
+│   │   └── main.py            application factory
+│   ├── tests/                 pytest suite
+│   ├── requirements.txt       runtime dependencies
+│   └── requirements-dev.txt   runtime plus test dependencies
+├── frontend/
+│   └── src/
+│       ├── components/        Taskbar, shared UI; workspace/, analysis/, atmosphere/
+│       ├── layouts/           application shell, navigation
+│       ├── modules/           algebra/ (keys, cipher state), analysis/ (readings)
+│       ├── pages/             Overview, Workspace, Analysis Lab, Settings
+│       ├── services/          API client, cipher and analysis calls
+│       ├── session/           shared workspace and analysis state
+│       └── theme/             light, dark, system
 ├── docs/
-│   ├── architecture/         Design decisions
-│   ├── mathematics/          Mathematical write-ups
-│   └── report/               Project report
-├── README.md
-├── LICENSE                   MIT
-└── .gitignore
+│   ├── architecture/          overview, design system
+│   ├── mathematics/           one note per topic
+│   ├── api.md                 endpoint reference
+│   └── report/                progress report, screenshots-v1.0.0/
+├── README.md · LICENSE (MIT)
 ```
 
 ## Installation
@@ -87,7 +134,7 @@ git clone https://github.com/Samudra-GITHUB/discreta.git
 cd discreta
 ```
 
-**Backend** (Windows PowerShell):
+Backend (Windows PowerShell; on macOS or Linux activate with `source .venv/bin/activate`):
 
 ```powershell
 cd backend
@@ -96,12 +143,8 @@ python -m venv .venv
 python -m pip install -r requirements-dev.txt
 ```
 
-`requirements-dev.txt` includes `requirements.txt` and adds the test tools (pytest, httpx and
-SymPy). To install only what is needed to run the server, use `requirements.txt`.
-
-On macOS/Linux, activate with `source .venv/bin/activate` instead.
-
-**Frontend:**
+`requirements-dev.txt` includes `requirements.txt` and adds pytest, httpx and SymPy; use `requirements.txt` alone
+to run the server only. Frontend:
 
 ```powershell
 cd frontend
@@ -109,12 +152,11 @@ npm install
 Copy-Item .env.example .env
 ```
 
-`.env` sets `VITE_API_BASE_URL=http://localhost:8000`. It is git-ignored; edit it if the
-backend runs elsewhere.
+`.env` sets `VITE_API_BASE_URL=http://localhost:8000` and is git-ignored.
 
-## Local development
+## Running
 
-Run the two servers in separate terminals.
+Use two terminals.
 
 **Backend**, from `backend/` with the virtual environment active:
 
@@ -122,57 +164,53 @@ Run the two servers in separate terminals.
 uvicorn app.main:app --reload --port 8000
 ```
 
-- API root: <http://localhost:8000/>
-- Health check: <http://localhost:8000/api/v1/health>
-- Interactive API docs: <http://localhost:8000/docs>
-- Cipher endpoints (all `POST`, JSON body): `/api/v1/algebra/caesar/encrypt`,
-  `/api/v1/algebra/caesar/decrypt`, `/api/v1/algebra/affine/encrypt`,
-  `/api/v1/algebra/affine/decrypt`. Analysis endpoints (`POST`, `{"text"}`): `/api/v1/analysis/frequency`,
-  `/api/v1/analysis/caesar/crack` and `/api/v1/analysis/affine/search`. Keys are integers with absolute value at most
-  9007199254740991 (2⁵³ − 1), text is at most 10,000 characters and a request body at most
-  256 KiB. Every error returns `{"detail": [{"loc", "msg", "type"}]}`: 422 for invalid input
-  (including invalid affine multipliers), 413 for oversized bodies. Details are in the
-  [mathematics notes](docs/mathematics/caesar-and-affine.md#10-api) and
-[frequency analysis](docs/mathematics/frequency-analysis.md#7-api).
-
 **Frontend**, from `frontend/`:
 
 ```powershell
 npm run dev
 ```
 
-Open <http://localhost:5173>. Settings shows the live result of the backend health check; stop the
-backend and press *Check again* to see the offline state, which the Cipher Workspace and Analysis Lab
-also report when you run something.
+Open <http://localhost:5173>. The frontend must stay on port 5173 (`strictPort`) because the backend allows only
+that origin (and 4173, `vite preview`) through CORS; set `DISCRETA_CORS_ORIGINS` to a comma-separated list to
+allow others. Settings shows the live backend status; stop the backend to see the offline state.
 
-**Tests and checks:**
+## API documentation
+
+With the backend running: Swagger UI at <http://localhost:8000/docs>, ReDoc at <http://localhost:8000/redoc>,
+schema at <http://localhost:8000/openapi.json>. A written summary of every endpoint, limit and error is in
+[docs/api.md](docs/api.md).
+
+## Testing
 
 ```powershell
-# backend (from backend/, venv active)
+# backend (from backend/, virtual environment active)
 python -m pytest
 
-# frontend (from frontend/): type-check and production build, then the unit and component tests
+# frontend (from frontend/): type-check and production build, then the tests
 npm run build
 npm test
 ```
 
-The frontend dev server must stay on port 5173 (it is configured with `strictPort`)
-because the backend only allows that origin through CORS. To allow other origins, set
-`DISCRETA_CORS_ORIGINS` to a comma-separated list before starting the backend.
+The backend tests use independent oracles (textbook vectors, `fractions`, `collections.Counter`, brute-force
+definitions, SymPy for number theory); the frontend tests run the real pages against a stubbed `fetch`.
 
-## Moving the repository
+## Known limitations
 
-Move the whole folder, including the hidden `.git` directory. Python virtual environments
-store absolute paths and break when moved, so afterwards recreate `backend/.venv` with the
-backend installation steps above. `frontend/node_modules` can be rebuilt with `npm install`
-if anything misbehaves. Both folders are git-ignored.
+* The ciphers are not secure, and rankings are estimates (see the disclaimer above).
+* English only: the reference table is one average, so another language, or unusual English such as a pangram,
+  can be ranked wrongly. Short texts are flagged but still ranked.
+* Vigenère recovery needs enough text per key letter (roughly 25 letters or more); Kasiski needs sequences that
+  repeat, so it finds nothing for a short text or a long key. The IC and Kasiski suggest, they do not prove.
+* Only Caesar, affine and Vigenère: no Playfair, Hill, transposition or modern ciphers.
+* Text up to 10,000 characters; keys up to ±(2⁵³ − 1); Vigenère keywords up to 64 letters; request bodies up to 256 KiB.
+* An integer literal of more than 4,300 digits is refused by Python's JSON parser with HTTP 400 rather than 422.
+* Python and Node environments are not portable between folders; recreate them if the repository is moved.
 
 ## Documentation
 
-- [Architecture decisions](docs/architecture/overview.md)
-- [Design system (Instrument)](docs/architecture/design-system.md)
-- [Mathematics notes](docs/mathematics/README.md)
-- [Report](docs/report/README.md)
+* [Architecture overview](docs/architecture/overview.md) · [Design system](docs/architecture/design-system.md)
+* [Mathematics notes](docs/mathematics/README.md) · [API reference](docs/api.md)
+* [Project report and screenshots](docs/report/README.md)
 
 ## Team
 

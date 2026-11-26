@@ -77,10 +77,84 @@ function reduced(label: string, raw: string, big: bigint | null): string | undef
     : `${label} = ${raw.trim()} acts as ${residue} (mod 26)`
 }
 
+/** How many letters of the message the alignment preview shows. */
+const ALIGNMENT_LETTERS = 16
+
+/**
+ * The Vigenère keyword, and a preview of how it repeats over the letters of the message. The
+ * preview is purely presentational (it shows which key letter meets which message letter); the
+ * encryption itself is always done by the backend.
+ */
+function KeywordControls({ lab }: { lab: CipherLab }) {
+  const { inputs, validation, setField } = lab
+  const parsed = validation.keyword
+  const error = validation.messages.key
+  const typed = inputs.text.match(/[A-Za-z]/g)
+  const message = typed && typed.length > 0 ? typed : Array.from('ATTACKATDAWN')
+  const shown = message.slice(0, ALIGNMENT_LETTERS)
+  const keyLetters = parsed.ok ? Array.from(parsed.value.toUpperCase()) : []
+
+  return (
+    <div className="grid gap-4">
+      <div>
+        <label htmlFor="vigenere-key" className="mb-1.5 block text-sm font-medium">
+          Keyword
+        </label>
+        <input
+          id="vigenere-key"
+          type="text"
+          autoComplete="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          value={inputs.keyword}
+          onChange={(event) => setField('keyword', event.target.value)}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? 'vigenere-key-error' : 'vigenere-key-hint'}
+          className="field num h-9 max-w-[22rem] tracking-wider"
+        />
+        {error ? (
+          <p id="vigenere-key-error" className="mt-1.5 text-xs font-medium text-err" role="alert">
+            {error}
+          </p>
+        ) : (
+          parsed.ok && (
+            <p id="vigenere-key-hint" className="caption num mt-1.5">
+              {keyLetters.length} letter{keyLetters.length === 1 ? '' : 's'}: {keyLetters.join(' ')} → shifts{' '}
+              {parsed.shifts.join(' ')}
+            </p>
+          )
+        )}
+      </div>
+
+      {parsed.ok && (
+        <div data-testid="key-alignment">
+          <p className="caption mb-1.5">
+            {typed && typed.length > 0 ? 'The keyword repeats over your letters:' : 'Example: the keyword repeats over the letters:'}
+          </p>
+          <div className="num grid w-fit grid-cols-[auto_auto] items-baseline gap-x-3 gap-y-0.5 text-[0.8125rem]">
+            <span className="text-fg-muted">message</span>
+            <span className="tracking-[0.35em]">{shown.join('')}</span>
+            <span className="text-fg-muted">key</span>
+            <span className="tracking-[0.35em] text-accent-ink">
+              {shown.map((_, i) => keyLetters[i % keyLetters.length]).join('')}
+            </span>
+          </div>
+          <p className="caption mt-1.5 max-w-[32rem]">
+            Only letters use up a key letter. Spaces, digits and punctuation are copied unchanged and skipped, so the key
+            stays aligned with the letters.
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 /** Key controls for the selected cipher. Affine multipliers are restricted to the 12 valid ones. */
 export function KeyControls({ lab }: { lab: CipherLab }) {
   const { inputs, validation, setField, nudge } = lab
   const { key, a, b, multiplier, messages } = validation
+
+  if (inputs.cipher === 'vigenere') return <KeywordControls lab={lab} />
 
   if (inputs.cipher === 'caesar') {
     return (

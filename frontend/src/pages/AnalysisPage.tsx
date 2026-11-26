@@ -2,6 +2,7 @@ import { useRef, type KeyboardEvent } from 'react'
 import { AffineTab } from '../components/analysis/AffineTab'
 import { CaesarTab } from '../components/analysis/CaesarTab'
 import { FrequencyTab } from '../components/analysis/FrequencyTab'
+import { VigenereTab } from '../components/analysis/VigenereTab'
 import { TextEditor } from '../components/TextEditor'
 import { PageHeader } from '../components/ui'
 import { MAX_TEXT_LENGTH, textLength } from '../modules/algebra/cipherMath'
@@ -12,6 +13,7 @@ const TABS: readonly { id: AnalysisKind; label: string }[] = [
   { id: 'frequency', label: 'Frequency Analysis' },
   { id: 'caesar', label: 'Caesar Analysis' },
   { id: 'affine', label: 'Affine Analysis' },
+  { id: 'vigenere', label: 'Vigenère Analysis' },
 ]
 
 export function AnalysisPage() {
@@ -38,8 +40,8 @@ export function AnalysisPage() {
   return (
     <>
       <PageHeader eyebrow="02 · Analysis" title="Analysis Lab">
-        Investigate ciphertext: count its letters, compare them with English, and rank every possible Caesar or affine key.
-        The same text is used in all three tabs.
+        Investigate ciphertext: count its letters, compare them with English, and rank every possible Caesar or affine key, and
+        investigate the key length of a Vigenère cipher. The same text is used in all four tabs.
       </PageHeader>
 
       <section className="mb-8 max-w-[52rem] border-t border-line pt-4" aria-label="Text under investigation">
@@ -93,6 +95,7 @@ export function AnalysisPage() {
         {tab === 'frequency' && <FrequencyTab />}
         {tab === 'caesar' && <CaesarTab />}
         {tab === 'affine' && <AffineTab />}
+        {tab === 'vigenere' && <VigenereTab />}
       </div>
     </>
   )

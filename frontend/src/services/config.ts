@@ -6,4 +6,4 @@ export const API_BASE_URL: string = (
 ).replace(/\/+$/, '')
 
 /** Application version, kept in step with package.json. */
-export const APP_VERSION = '0.4.0'
+export const APP_VERSION = '1.0.0'

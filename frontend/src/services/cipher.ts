@@ -4,6 +4,8 @@ import type {
   CaesarRequest,
   CaesarResponse,
   CipherOperation,
+  VigenereRequest,
+  VigenereResponse,
 } from '../types/cipher'
 import { ApiError, apiPost, type RequestOptions } from './api'
 
@@ -43,6 +45,22 @@ function isAffineResponse(value: unknown): value is AffineResponse {
   )
 }
 
+function isVigenereResponse(value: unknown): value is VigenereResponse {
+  if (typeof value !== 'object' || value === null) return false
+  const v = value as Record<string, unknown>
+  return (
+    v.cipher === 'vigenere' &&
+    isOperation(v.operation) &&
+    typeof v.input === 'string' &&
+    typeof v.output === 'string' &&
+    typeof v.key === 'string' &&
+    Array.isArray(v.key_shifts) &&
+    v.key_shifts.every(isInt) &&
+    isInt(v.key_length) &&
+    v.key_length === v.key_shifts.length
+  )
+}
+
 /** Run the Caesar cipher on the backend. */
 export async function runCaesar(
   operation: CipherOperation,
@@ -65,6 +83,19 @@ export async function runAffine(
   const body = await apiPost<unknown>(`${ALGEBRA_BASE_PATH}/affine/${operation}`, request, options)
   if (!isAffineResponse(body) || body.operation !== operation) {
     throw new ApiError('Backend returned an unexpected affine response', null)
+  }
+  return body
+}
+
+/** Run the Vigenère cipher on the backend. */
+export async function runVigenere(
+  operation: CipherOperation,
+  request: VigenereRequest,
+  options?: RequestOptions,
+): Promise<VigenereResponse> {
+  const body = await apiPost<unknown>(`${ALGEBRA_BASE_PATH}/vigenere/${operation}`, request, options)
+  if (!isVigenereResponse(body) || body.operation !== operation) {
+    throw new ApiError('Backend returned an unexpected Vigenère response', null)
   }
   return body
 }

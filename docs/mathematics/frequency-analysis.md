@@ -10,6 +10,7 @@ This note explains the mathematics implemented in `backend/app/modules/analysis/
 | `cryptanalysis.py` | Caesar (26 keys) and affine (312 keys) key ranking, reliability |
 | `schemas.py`, `router.py` | The HTTP API |
 
+The Vigenère investigation (index of coincidence, Kasiski) is in [Polyalphabetic analysis](polyalphabetic-analysis.md).
 It builds on [Caesar and affine ciphers](caesar-and-affine.md): letters are numbers in ℤ₂₆, and
 both ciphers are bijections of ℤ₂₆. SymPy is not used. The tests use `collections.Counter`,
 `fractions`, `math.gcd` and `pow(a, -1, 26)` as independent oracles.
@@ -133,7 +134,7 @@ All endpoints are `POST` with a JSON body and share the error format of the ciph
 
 | Endpoint | Body | Reply |
 | --- | --- | --- |
-| `/api/v1/analysis/frequency` | `{"text"}` | per-letter counts, shares, English comparison, ranks, χ², character breakdown |
+| `/api/v1/analysis/frequency` | `{"text"}` | per-letter counts, shares, English comparison, ranks, χ², the index of coincidence, character breakdown |
 | `/api/v1/analysis/caesar/crack` | `{"text"}` | all 26 keys ranked, with text, χ², reliability |
 | `/api/v1/analysis/affine/search` | `{"text", "plaintext_limit"?}` | all 312 keys ranked, χ², inverses, reliability |
 

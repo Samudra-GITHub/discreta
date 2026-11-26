@@ -60,9 +60,19 @@ const METHODS = [
     text: 'Multiplies, then shifts. The multiplier needs gcd(a, 26) = 1, which leaves 12 multipliers and 312 keys.',
   },
   {
+    name: 'Vigenère cipher',
+    formula: 'Cᵢ = (Pᵢ + Kᵢ) mod 26',
+    text: 'A repeating keyword gives each letter its own shift, which hides single-letter frequencies. It is broken by finding the key length first.',
+  },
+  {
     name: 'Frequency analysis',
     formula: 'count(letter) / total',
     text: 'Counts each letter and compares the distribution with ordinary English, where E and T lead.',
+  },
+  {
+    name: 'Index of coincidence and Kasiski',
+    formula: 'IC = Σ f(f − 1) / (N(N − 1))',
+    text: 'Measure how English-like the letters are, and look for repeated sequences, to estimate a repeating key length. Evidence, not proof.',
   },
   {
     name: 'Chi-squared key search',

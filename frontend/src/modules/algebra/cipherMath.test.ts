@@ -241,3 +241,59 @@ describe('buildWorkedExample', () => {
     expect(buildWorkedExample(affine({ effective_a: 4, a_inverse: 7 }))).toEqual({ status: 'unverified' })
   })
 })
+
+describe('buildWorkedExample for Vigenère', () => {
+  const vig = (over: Record<string, unknown>) =>
+    ({
+      cipher: 'vigenere',
+      operation: 'encrypt',
+      input: 'ATTACK',
+      output: 'LXFOPV',
+      key: 'LEMON',
+      key_shifts: [11, 4, 12, 14, 13],
+      key_length: 5,
+      ...over,
+    }) as unknown as Parameters<typeof buildWorkedExample>[0]
+
+  it('applies the next key letter to each letter and reports it', () => {
+    const example = buildWorkedExample(vig({}))
+    expect(example.status).toBe('ok')
+    if (example.status !== 'ok') return
+    expect(example.steps.map((s) => s.keyLetter)).toEqual(['L', 'E', 'M', 'O', 'N'])
+    expect(example.steps[0]).toMatchObject({ input: 'A', number: 0, expression: '0 + 11', result: 11, output: 'L' })
+    expect(example.steps[1]).toMatchObject({ expression: '19 + 4', raw: 23, result: 23, output: 'X' })
+  })
+
+  it('wraps the key and reduces results above 25', () => {
+    // The sixth letter reuses the first key letter: K (10) + L (11) = 21 -> V.
+    const example = buildWorkedExample(vig({}), 6)
+    if (example.status !== 'ok') throw new Error('expected ok')
+    expect(example.steps[5]).toMatchObject({ keyLetter: 'L', expression: '10 + 11', raw: 21, output: 'V' })
+    const wrapped = buildWorkedExample(vig({ input: 'Z', output: 'K', key_shifts: [11], key: 'L', key_length: 1 }))
+    if (wrapped.status !== 'ok') throw new Error('expected ok')
+    expect(wrapped.steps[0]).toMatchObject({ raw: 36, result: 10, output: 'K' })
+  })
+
+  it('does not advance the key on non-letters', () => {
+    const example = buildWorkedExample(vig({ input: 'A, T', output: 'L, X' }))
+    if (example.status !== 'ok') throw new Error('expected ok')
+    expect(example.steps.map((s) => s.keyLetter)).toEqual(['L', 'E'])
+  })
+
+  it('subtracts when decrypting', () => {
+    const example = buildWorkedExample(vig({ operation: 'decrypt', input: 'LXFOPV', output: 'ATTACK' }))
+    if (example.status !== 'ok') throw new Error('expected ok')
+    expect(example.steps[0]).toMatchObject({ expression: '11 − 11', raw: 0, output: 'A' })
+    expect(example.steps[3]).toMatchObject({ expression: '14 − 14', raw: 0, output: 'A' })
+  })
+
+  it('is withheld when the backend output disagrees or the shifts are invalid', () => {
+    expect(buildWorkedExample(vig({ output: 'LXFOPX' })).status).toBe('unverified')
+    expect(buildWorkedExample(vig({ key_shifts: [] })).status).toBe('unverified')
+    expect(buildWorkedExample(vig({ key_shifts: [30] })).status).toBe('unverified')
+  })
+
+  it('reports a message without letters', () => {
+    expect(buildWorkedExample(vig({ input: '123', output: '123' })).status).toBe('no-letters')
+  })
+})
